@@ -1,0 +1,281 @@
+---
+title: "An introduction to the prevEst version 2.0 package and recommended workflow"
+author: "Corey Neff, Quinn T. Ostrom, and Mackenzie Price"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simple prevEst workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+fig_width: 9 
+fig_height: 6 
+---
+
+```{r setup, include = FALSE, warning=F}
+library(tidyverse)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE, 
+  message = FALSE,
+  comment = "#>"
+)
+
+list.files("../R", "*.R", full.names = T) %>%
+  sapply(source)
+
+c(list.files("../data", full.names = T), "../R/sysdata.rda") %>%
+  sapply(.,load,.GlobalEnv)
+
+plot.theme <- 
+  theme(axis.text = element_text(colour="black"),
+        axis.title = element_text(colour="black",face="bold"),
+        panel.grid = element_blank(),
+        panel.background = element_blank(),
+        strip.text = element_text(colour="black",face="bold"),
+        strip.background = element_blank())
+
+```
+
+
+
+
+## Importing Incidence and Survival Data
+
+For cancer registry data that is available in SEER\*Stat (e.g. SEER, USCS, NAACCR data) it is easy to generate underlying data files. The sample data provided in the package is based off output one might retrieve from SEER\*Stat. Similar data may be obtained as follows:
+
+For the incidence data, use the case listing session with the recommended settings as follows:
+
+* *Statistic tab:* select "Frequencies" and "None" for percentages;
+* *Selection tab:* the primary inclusion and exclusion criteria for the cancer of interest;
+* *Table tab:* at a minimum include a year of diagnosis, age at diagnosis, and identifying histopatholgoies if any. You may also include other outcome interests such as sex, behavior, race ect. The final output should have the total cases diagnosed for each unique combination of year of diagnosis and age at diagnosis.
+
+For observed survival proportions use the survival session with the recommended settings as follows:
+
+* *Data:* keep in mind that prevalence estimates are more robust with long follow-up times, so be sure to select appropriate dataset for your study interest;
+* *Statistic tab:* select "Relative Survival","Ederer II" and "Actuarial";
+* *Selection tab:* the primary inclusion and exclusion criteria for the cancer of interest as well as "Alive with No Survival Time" selected;
+* *Parameters tab:* select "Pre-calculated Duration", "Survival months (from complete dates), the date of prevalence for study cutoff, "Cumulative Summary" and "Tables" under display, and select "observed" under cumulative summary;
+* *Table tab:* at a minimum include a year of diagnosis, age at diagnosis, and identifying histopatholgoies if any. You may also include other outcome interests such as sex, behavior, race ect. Additionally, like the incidence data, there should be one survival probability for each unique combination of year of diagnosis and age at diagnosis. 
+
+While we can't provide SEER data, dummy data resembling SEER data has been included in the package. The bottom 10 rows of the **incidence** dataset are shown.
+
+```{r read in data, echo=TRUE, message=FALSE, eval=FALSE}
+library(SEER2R)
+library(tidyverse)
+
+data(incidence)
+data(incidence_est)
+data(survival)
+```
+
+## Importing Life Table Data
+
+Life tables are generated from the US mortality data and are used to calculate expected survival. 
+For more information on available SEER\*Stat life tables visit
+https://seer.cancer.gov/expsurvival/
+
+For life table data, use the survival  session with the recommended settings as follows:
+
+* *Statistic tab:* select "Using Expected Survival", "Ederer II", "Actuarial", and whichever expected survival table fits your needs;
+* *Selection tab:* the primary inclusion and exclusion criteria for the cancer of interest as well as "Alive with No Survival Time" selected;
+* *Table tab:* At the very least, an age variable must be selected, but any number of other strata may be used if available.
+
+Next we will load in the dummy life table data and look at its structure. 
+
+```{r, echo=TRUE, eval = T}
+data(life.table)
+  
+tail(life.table, 10)
+```
+
+The probabilities shown are expected (i.e. average total-population mortality) relative survival rates, such for any combination of age at diagnosis and length of time, the survival probability corresponds to the probability that that person will live an additional year. For example, among all people who were 65 years old 10 years ago (i.e. 75 years old now), there is a `r round(life.table[which(life.table$ageDiag == 85 & life.table$period == 10),]$expected, 3)*100`% chance they will live an additional year.
+
+## Preparing Incidence Data
+Now we can start by preparing the incidence data for the prevEst() function. We will start with cleaning both incidence data sources, **incidence** and **incidence_est**. **Incidence** represents data from a data source that covers your entire population of interest but not for the entire period of interest. The **incidence_est** data, on the other hand, covers your entire period of interest, but not the whole population. For both of these data sources, we will use the ``format_incidence()`` function to prepare the data. This function is a light wrapper of some simple data cleaning tasks.
+
+```{r echo=TRUE}
+incidence_reformat <- format_incidence(data = mutate_all(incidence, as.numeric),
+                                       ages = 0:85,
+                                       years = 2004:2018,
+                                       names = c("ageDiag"="ageDiag",
+                                                "yrDiag"="yrDiag",
+                                                "incidence"="count"))
+
+incidence_est_reformat <- format_incidence(data = incidence_est,
+                                       ages = 0:85,
+                                       years = 1980:2018,
+                                       names = c("ageDiag"="ageDiag",
+                                                "yrDiag"="yrDiag",
+                                                "incidence"="count"))   
+
+tail(incidence_est_reformat, 10)
+```
+Here we can see 3 columns:
+
+1. ageDiag
+2. yrDiag
+3. count
+
+As the names imply, ageDiag is the age at which a case was diagnosed, yrDiag is the year of diagnosis, and  count is the number of people diagnosed of that age and year. While there are no restrictions on ages included other than that they must be non-negative, if using grouped ages or any other non-standard age values at this step, make sure the survival data is prepared similarly.
+
+## Using the ``regprev()`` Function
+Now that we have both of our incidence sources formatted, it is time to combine them to complete our complete incidence estimate. By default, it will use all years that both datasets have in common, but you can choose which years to regress or use for model building as this may be more appropriate for some cases. This is especially the case if you have reasons to believe that certain years in your incidence data may be unreliable even if present.
+
+``` {r echo=TRUE}
+complete_incidence_reformat <- regPrev(incidence_reformat, 
+                                       incidence_est_reformat, 
+                                       regYr = 2004:2019, 
+                                       durationYr = 1975:2003)  
+
+head(complete_incidence_reformat, 10)
+```
+
+Aside from the incidence data sources as the first two arguments, you'll see there are two remaining optional arguments, ``regYr`` and ``durationYr``. These refer to the years you want to use to build the regression model and the years you want to estimate data for, respectively. If not specified, the default behavior of ``regYr`` is to use all years in common among the two data sources, and ``durationYr`` uses all other years. This may not be a realistic assumption to make in practice, so both ranges should be specified with care.
+
+1. *regYr* -- 
+
+## Preparing Survival Data
+
+In order to project survival beyond what has been observed, assumptions must be made. These assumptions are put into use when there is a disparity between the years specified in the ``years = X``and the years available in the dataset, and the best one should be determined by the specific characteristics of the cancer(s) of interest. One option is to assume that at the end of the observation period, the cancer itself no longer contributes relative survival. After that point, survival would merely be a function of age. While not necessarily realistic, it may be helpful to extend some types of data. The survival assumptions included here, though they are by no means exhaustive, are:
+
+### 1. Population Survival
+
+Population survival assumes that survival continues to decline outside of the periods available based on the provided population life-tables.
+This first assumption is that for the years where a disparity exist, the missing years can be estimated using population life (actuarial) tables. When this is the case, provide the life tables as shown above to the corresponding argument.
+
+``` {r echo=TRUE}
+survival <- survival %>%
+  filter(period + yrDiag == 2018)
+
+popsurvival_reformat <- format_survival(data=survival,
+                                     ages = 0:85,
+                                       years = 1975:2019,
+                                       prevYear = 2019,
+                                     assumption = "population",
+                                     life.table = life.table,
+                                     names = c("ageDiag"="ageDiag",
+                                              "yrDiag"="yrDiag",
+                                              "Observed"="survival"))   
+tail(popsurvival_reformat)
+```
+
+Like the incidence data, the survival data has an *ageDiag* and *yrDiag* column. In addition, there is now a period column, which is the time length from the year they were diagnosed to the estimated incidence year. In this case, 1975 is 43 years before 2018. Similarly, the *agePrev* column is the ageDiag column plus the time from diagnosis. Finally *survival* refers to the cumulative survival probability at that age and year of prevalence. Here we can see that 85 year olds diagnosed in the year 1975 have a 0% chance of survival. 
+
+### 2. No Survival
+
+No survival assumes that all survival estimates fall to zero after the observed follow-up period.
+This assumption assumes that, for the years that there is a disparity, there was no survival. For example, if you only have 15 years of survival data, but the ``years = X`` argument suggests you want 20 in the output, years 16-20 will be provided as requested, but survival will be 0.
+
+``` {r echo=TRUE}
+nosurvival_reformat <- format_survival(data=survival,
+                                       ages = 0:85,
+                                       years = 1975:2019,
+                                       prevYear = 2019,
+                                       assumption = "nosurvival",
+                                       names = c("ageDiag"="ageDiag",
+                                              "yrDiag"="yrDiag",
+                                              "Observed"="survival"))   
+tail(nosurvival_reformat, 10)
+```
+While this data may look familiar, the key difference is that outside of the years for which there are data (e.g. 2000-2014), there is no survival.
+
+### 3. Filled Survival
+
+Finally, in cases where you may want to fill existing survival data into the years for which there are a disparity,  you may use this option. This assumption may be sound for cases of larger disparities, and so should be used with caution. The 
+
+``` {r echo=TRUE}
+fillsurvival_reformat <- format_survival(data=survival[survival$yrDiag >= 2000,],
+                                       ages = 0:85,
+                                       years = 1975:2019,
+                                       prevYear = 2019,
+                                       assumption = "fill",
+                                       names = c("ageDiag"="ageDiag",
+                                              "yrDiag"="yrDiag",
+                                              "Observed"="survival"))   
+tail(fillsurvival_reformat, 10)
+```
+
+It is important to note that in cases where sample size is low, more careful preparation of survival data may be warranted.
+
+## Generating Incomplete Prevalence Estimates
+
+Once the survival and incidence data are properly formatted, using them in the ``prevEst`` function is simple. It is designed so the user need only input the desired year to calculate prevalence estimates. Further options are provided to expand output including an option for age-adjusted prevalence,grouped ages, and sex-specific counts. You may also select the years to be used for calculation of prevalence, however if left blank, will include all the years from the incidence data. 
+
+In this example, using the previously cleaned data, incomplete prevalence is calculated for the year 2018. Here we are only using the incomplete incidence data to form an incomplete prevalence estimate for the shorter of the two incidence datasets, **incidence_reformat**. Here, we are also grouping ages into 5-year age groups, though this is not necessary.
+
+```{r echo=TRUE}
+incomplete_prevalence <- prevEst(incidence=incidence_reformat, 
+                                 survival=popsurvival_reformat,
+                                 year = 2019,
+                                 grouped_ages = T,
+                                 groups = seq(0,100,5))
+
+tail(incomplete_prevalence, 10)
+```
+You'll notice that ages 100 and above show an estimated prevalence of 0; this is because survival estimates beyond this age are generally unrealiable, and so people in this group will be assumed to have 0% survival.
+
+## Generating Complete Prevalence Estimates
+
+Measures of prevalence can be divided into two general categories; incomplete or complete prevalence. Incomplete prevalence provides the proportion of living that had been diagnosed within a defined period (i.e. only those diagnosed with brain cancer between 2004 and 2006 still living on August 3, 2019), while complete prevalence is a measure of those living with a diagnosis at a certain point in time regardless of the time of diagnosis (i.e. anyone diagnosed with brain cancer still living on August 3, 2019). 
+
+Using the ``prevEst`` function as done previously, the complete incidence data (as that created from the ``regPrev()`` function) is used to form a complete prevalence estimate for the full followup, **complete_incidence_reformat**.
+
+```{r echo=TRUE}
+complete_prevalence <- prevEst(incidence=complete_incidence_reformat, 
+                               survival=popsurvival_reformat,
+                               year = 2019,
+                               grouped_ages = T,
+                               groups = seq(0,100,5))
+
+tail(complete_prevalence, 10)
+```
+
+## Visualizing Prevalence Estimates
+
+Now we can combine the two prevalence estimates to visualize.
+
+```{r echo=TRUE, fig.height= 4, fig.width=8}
+combined_prevalence <- full_join(incomplete_prevalence, complete_prevalence, by = "agePrev") %>%
+  pivot_longer(cols = c(prevalence.x, prevalence.y), names_to = "type", values_to = "prevalence") %>%
+  mutate(type = recode(type, prevalence.x = "Incomplete Prevalence", prevalence.y = "Complete Prevalence")) 
+
+combined_prevalence %>%
+  group_by(type) %>%
+  summarise(prevalence = sum(prevalence, na.rm = T)) %>%
+  ungroup() %>%
+  ggplot(aes(x = type, y = prevalence,  fill = type, label = scales::comma(prevalence))) +
+  geom_col() + 
+  geom_text(position = position_stack(vjust = 0.5))  + 
+  scale_y_continuous(name = "Total Estimated Prevalence", labels = scales::comma, expand = c(0,0)) +
+  scale_x_discrete(name = "Prevalence Type", expand = c(0,0)) +
+  plot.theme +
+  theme(legend.position = "none")
+
+combined_prevalence %>%
+  ggplot(aes(x = agePrev, y = prevalence, fill = type)) +
+  geom_col() + 
+  scale_y_continuous(name = "Estimated Prevalence", labels = scales::comma, expand = c(0,0)) +
+  scale_x_continuous(name = "Age at Prevalence", limits = c(0,100), expand = c(0,0)) +
+  labs(fill = "Prevalence Type") +
+  plot.theme
+
+```
+As can be seen, in most cases, complete prevalence is much higher than incomplete prevalence. It seems like complete prevalence is about 50% higher than incomplete prevalence. This is largely due to the fact that, despite covering a longer period of time, the incomplete incidence are an underestimate due to the underlying differences in geography attributed to each simulated dataset. 
+
+## Generating Age-Adjusted Prevalence Rates
+
+While age-adjusted rates can be obtained manually, this functionality is included in the ``prevEst`` function for users who specify ``adjust = T``, and requires no additional preparation assuming the data has been prepared as shown above. The data for age-specific (crude) rates was obtained from the US census and includes population estimates for each age group in 2018 by sex, and the standard population used is the U.S. 2000 Standard Population.Additionally, this function can take grouped ages. To use grouped ages, input a vector to group ages by (i.e. seq(0,85,5) for five-year age bins from 0 to 85, with 85+ grouped into 85). If no grouped ages are desired, the data can be returned in single ages up to 85. Finally, if your data is sex-specific (e.g. as in the case of ovarian cancer), sex-specific rates are also obtainable by specifying ``sex_specific == "Male"`` or ``sex_specific == "Female"``:
+
+```{r echo=TRUE,message=FALSE}
+complete_prevalence_rates <- prevEst(incidence=complete_incidence_reformat, 
+                                 survival=popsurvival_reformat,
+                                 year = 2018,
+                                 adjust = T,
+                                 grouped_ages = T,
+                                 groups = seq(0,85,5))
+
+head(complete_prevalence_rates)
+```
+
+
+
