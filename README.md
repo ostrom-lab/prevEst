@@ -1,6 +1,4 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # prevEst version 2.0
 
 prevEst is an R package for calculating prevalence using incomplete
