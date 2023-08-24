@@ -25,6 +25,7 @@
 #' format_survival(survival,
 #'                 ages = c(0:85),
 #'                 years = c(2015:2018),
+#'                 SurvType= c("Observed")
 #'                 Observed.Surv = TRUE,
 #'                 Expected.Surv = FALSE,
 #'                 assumption = "nosurvival",
@@ -60,6 +61,7 @@ format_survival <- function(data, # Survival data to be formatted
                             prevYear = NULL, # Year to calculate prevalence for. Defaults to the highest years in data.
                             assumption="nosurvival", 
                             years.observed.surv = NULL,
+                            SurvType = "Observed",
                             life.table=NULL,
                             names=c("ageDiag"="ageDiag",
                                     "yrDiag"="yrDiag",
@@ -76,10 +78,10 @@ format_survival <- function(data, # Survival data to be formatted
   if(is.null(prevYear)) {
     prevYear = max(years)
   } 
-
-  new <- data.frame(ageDiag  = as.numeric(gsub("\\D", "", data[[names[["ageDiag"]]]])),
-                    yrDiag = as.numeric(gsub("\\D", "", data[[names[["yrDiag"]]]])),
-                    survival = as.numeric(data[[names[["Observed"]]]])) %>%
+  
+  new <- data.frame(ageDiag  = as.numeric(gsub("\\D", "", data[[,names[["ageDiag"]]]])),
+                    yrDiag = as.numeric(gsub("\\D", "", data[[,names[["yrDiag"]]]])),
+                    survival = as.numeric(data[[,names[["Observed"]]]])) %>%
     dplyr::filter(yrDiag %in% years) %>%
     dplyr::mutate(yrPrev = prevYear,
            period = yrPrev-yrDiag,
