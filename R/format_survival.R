@@ -5,8 +5,11 @@
 #' @param ages Numeric vector
 #' @param years Numeric vector
 #' @param prevYear Numeric vector
+#' @param Observed.Surv Logical
+#' @param Expected.Surv Logical
 #' @param assumption Named character vector
 #' @param life.table Dataframe of SEER life table
+#' @param years.observed.surv numeric
 #' @param names Named vector
 #' @param keepExtraCols Logical
 #' @details The prevEst function requires properly formatted incidence and survival data. This function, the counterpart to [format_incidence()],is designed 
@@ -22,19 +25,26 @@
 #' format_survival(survival,
 #'                 ages = c(0:85),
 #'                 years = c(2015:2018),
+#'                 Observed.Surv = TRUE,
+#'                 Expected.Surv = FALSE,
 #'                 assumption = "nosurvival",
+#'                 years.observed.surv = NULL,
 #'                 names = c("ageDiag" = "ageDiag",
 #'                           "yrDiag" = "yrDiag",
-#'                           "Observed" = "survival"),
+#'                           "Observed" = "survival",
+#'                           "Expected" = "Expected"),
 #'                 keepExtraCols = FALSE)
 #'                 
 #' format_survival(survival,
 #'                 ages = c(0:85),
 #'                 years = c(1995:2018),
+#'                 Observed.Surv = TRUE,
+#'                 Expected.Surv = FALSE,
 #'                 assumption = "population",
 #'                 names = c("ageDiag" = "ageDiag",
 #'                           "yrDiag" = "yrDiag",
-#'                           "Observed" = "survival"),
+#'                           "Observed" = "survival",
+#'                           "Expected" = "Expected"),
 #'                 life.table = life.table,
 #'                 keepExtraCols = FALSE)
 #' 
@@ -49,10 +59,12 @@ format_survival <- function(data, # Survival data to be formatted
                             years = NULL, # Years included in the data to be included in the output
                             prevYear = NULL, # Year to calculate prevalence for. Defaults to the highest years in data.
                             assumption="nosurvival", 
+                            years.observed.surv = NULL,
                             life.table=NULL,
                             names=c("ageDiag"="ageDiag",
                                     "yrDiag"="yrDiag",
-                                    "Observed"="Observed"),
+                                    "Observed"="Observed",
+                                    "Expected" ="Expected"),
                             keepExtraCols=FALSE
 ) {
   options(dplyr.summarise.inform = FALSE)
@@ -81,7 +93,9 @@ format_survival <- function(data, # Survival data to be formatted
       dplyr::bind_cols(data %>% dplyr::select(-names))
   }
   
-  years.observed.surv = length(unique(new$yrDiag))
+  if (is.null(years.observed.surv )) {
+    years.observed.surv = length(unique(new$yrDiag))
+  }
   
   # Create skeleton dataframe and left join to "new" dataframe to handle missing values.
   skeleton <- tidyr::expand_grid(ageDiag  = ages,

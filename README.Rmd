@@ -21,7 +21,7 @@ prevEst is an R package for calculating prevalence using incomplete population-l
 
 ## Overview
 
-Prevalence is an estimate of the total number of living persons with a disease regardless of when they were diagnosed. Specifically, Complete prevalence is the measure of people remaining alive regardless of the time of diagnosis. This is calculated using incidence and overall survival. This prackage provides useful functions for estimating complete prevalence from survival and incidence data. This package uses methods outlined in Zhang et al., (2017). "Complete prevalence of malignant primary brain tumors registry data in the United States compared with other common cancers, 2010."
+Prevalence is an estimate of the total number of living persons with a disease regardless of when they were diagnosed. Specifically, Complete prevalence is the measure of people remaining alive regardless of the time of diagnosis. This is calculated using incidence and overall survival. This prackage provides useful functions for estimating complete prevalence from survival and incidence data. This package uses methods outlined in Zhang et al., (2017). "Complete prevalence of malignant primary brain tumors registry data in the United States compared with other common cancers, 2010." and Neff et al. (2023) "Complete prevalence of primary malignant and nonmalignant brain tumors in comparison to other cancers in the United States."
 
 
 ## Installation
@@ -53,14 +53,11 @@ Before using this function, it is recommended that the data be properly formatte
 
 ## Citing prevEst
 
-If you use the prevEst method, please cite:
+If you use the prevEst method, please cite the following:
 
 [Zhang et al., (2017). Complete prevalence of malignant primary brain tumors registry data in the United States compared with other common cancers, 2010, 19(5), 726-735, doi: 10.1093/neuonc/now25](https://doi.org/10.1093/neuonc/now252)
 
-
-If you use the software, please cite
-
-## License
+[Neff et al., (2023). Complete prevalence of primary malignant and nonmalignant brain tumors in comparison to other cancers in the United States, 129(16), 2514-2521, doi: 10.1002/cncr.34837 ](https://doi.org/10.1002/cncr.34837)
 
 ## Authors
 Zhang,Adah;Neff, Corey; Price, Mackenzie; Barnholtz-Sloan, Jill S.; Ostrom, Quinn T.
