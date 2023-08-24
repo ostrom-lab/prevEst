@@ -8,31 +8,79 @@ population-level incidence and survival data.
 
 ## Overview
 
+Prevalence is an estimate of the total number of living persons with a
+disease regardless of when they were diagnosed. Specifically, Complete
+prevalence is the measure of people remaining alive regardless of the
+time of diagnosis. This is calculated using incidence and overall
+survival. This package provides useful functions for estimating complete
+prevalence from survival and incidence data. This package uses methods
+outlined in Zhang et al., (2017). “Complete prevalence of malignant
+primary brain tumors registry data in the United States compared with
+other common cancers, 2010.” and Neff et al. (2023) “Complete prevalence
+of primary malignant and nonmalignant brain tumors in comparison to
+other cancers in the United States.”
+
 ## Installation
+
+``` r
+devtools::install_github("ostrom-lab/prevEst")
+```
 
 ## Usage
 
+Before using this function, it is recommended that the data be properly
+formatted. For ease of use, two functions are included to format
+incidence and survival data for the \[prevEst()\] function. These are
+the \[format_incidence()\] and \[format_survival()\] functions.
+
+\[format_incidence()\] requires three columns: 1) age at diagnosis, 2)
+year of diagnosis, and 3) the reported incidence for that combination of
+the two from a SEER-like dataframe and will return an incidence
+dataframe fit for use in the \[prevEst()\] function.
+
+\[format_survival()\] requires life tables, three columns: 1) age at
+diagnosis, 2) year of diagnosis, and 3) the observed survival for that
+combination of the two from a SEER-like dataframe and will return a
+survival dataframe fit for use in the \[prevEst()\] function.
+
+\[project_incidence()\] allows the user to project incidence for years
+with no observed data. Returns an incidence dataframe with all requested
+years of incidence.
+
+\[project_survival()\] allows the user to project survival for years
+with no observed data. Returns a survival dataframe with all requested
+years of survival.
+
+\[regPrev()\] combines dataframes of incidence to estimate complete
+incidence using an incomplete incidence dataframe, and an incidence
+dataframe for a smaller population with long follow up time. Fills in
+estimates using regression, and returns a dataframe with incidence
+estimates for requested years.
+
+\[regSurv()\] combines dataframes of survival to estimate complete
+survival using an incomplete survival dataframe, and life tables. Fills
+in estimates using regression, and returns a dataframe with survival
+estimates for all requested years.
+
+\[prevEst()\] Uses the survival and incidence dataframes to estimate
+prevalence. Function includes options for age-adjusted prevalence and
+sex-specific estimates.
+
 ## Citing prevEst
 
-If you use the prevEst method, please cite:
+If you use the prevEst method, please cite the following:
 
 [Zhang et al., (2017). Complete prevalence of malignant primary brain
 tumors registry data in the United States compared with other common
 cancers, 2010, 19(5), 726-735, doi:
 10.1093/neuonc/now25](https://doi.org/10.1093/neuonc/now252)
 
-If you use the software, please cite
-
-add citation for new manuscript here
-
-## License
+[Neff et al., (2023). Complete prevalence of primary malignant and
+nonmalignant brain tumors in comparison to other cancers in the United
+States, 129(16), 2514-2521, doi:
+10.1002/cncr.34837](https://doi.org/10.1002/cncr.34837)
 
 ## Authors
 
-Adah Zhang
-
-Corey Neff
-
-Quinn T. Ostrom
-
-Jill S. Barnholtz-Sloan
+Zhang,Adah;Neff, Corey; Price, Mackenzie; Barnholtz-Sloan, Jill S.;
+Ostrom, Quinn T.
