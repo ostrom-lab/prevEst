@@ -66,10 +66,12 @@ prevEst <- function(
   
 
     inc <- incidence %>% dplyr::mutate_all(as.numeric)  %>%
+      dplyr::distinct(.keep_all=TRUE) %>%
       dplyr::mutate(yrPrev = year,
            agePrev = (year-yrDiag) + ageDiag)
       
     surv <- survival %>% dplyr::mutate_all(as.numeric) %>%
+      dplyr::distinct(.keep_all=TRUE) %>%
       dplyr::mutate(yrPrev = year,
              agePrev = (year-yrDiag) + ageDiag,
              survival = ifelse(agePrev >=100, 0, survival))
@@ -77,9 +79,8 @@ prevEst <- function(
     
     prevest <- inc %>%
       dplyr::filter(yrDiag %in% years) %>%
-      dplyr::left_join(surv, by = c("ageDiag", "yrDiag", "agePrev")) %>%
-      dplyr::mutate(yrPrev = year,
-                    final = count*survival) %>%
+      dplyr::left_join(surv, by = c("ageDiag", "yrDiag", "agePrev","yrPrev")) %>%
+      dplyr::mutate(final = count*survival) %>%
       dplyr::group_by(agePrev) %>%
       dplyr::summarise(prevalence = round(sum(final, na.rm=TRUE))) %>%
       dplyr::ungroup() %>%

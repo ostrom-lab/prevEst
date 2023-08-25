@@ -79,12 +79,13 @@ format_survival <- function(data, # Survival data to be formatted
     prevYear = max(years)
   } 
   
-  new <- data.frame(ageDiag  = as.numeric(gsub("\\D", "", data[[,names[["ageDiag"]]]])),
-                    yrDiag = as.numeric(gsub("\\D", "", data[[,names[["yrDiag"]]]])),
-                    survival = as.numeric(data[[,names[["Observed"]]]])) %>%
-    dplyr::filter(yrDiag %in% years) %>%
-    dplyr::mutate(yrPrev = prevYear,
-           period = yrPrev-yrDiag,
+  new <- data.frame(ageDiag  = as.numeric(gsub("\\D", "", data[[names[["ageDiag"]]]])),
+                    yrDiag = as.numeric(gsub("\\D", "", data[[names[["yrDiag"]]]])),
+                    yrPrev = as.numeric(gsub("\\D", "", data[[names[["yrPrev"]]]])),
+                    survival = as.numeric(data[[names[["Observed"]]]])) %>%
+    dplyr::distinct(.keep_all=TRUE) %>%
+    dplyr::filter(yrDiag %in% years & yrPrev == prevYear) %>%
+    dplyr::mutate(period = yrPrev-yrDiag,
            agePrev = ageDiag+period,
            survival = dplyr::case_when(survival>1 ~ survival/100,
                                 TRUE ~ survival)) %>%
@@ -102,7 +103,8 @@ format_survival <- function(data, # Survival data to be formatted
   # Create skeleton dataframe and left join to "new" dataframe to handle missing values.
   skeleton <- tidyr::expand_grid(ageDiag  = ages,
                                  yrDiag = years,
-                                 yrPrev = prevYear) %>%
+                                 yrPrev = prevYear)  %>%
+    dplyr::distinct(.keep_all=TRUE) %>%
     dplyr::mutate(period=yrPrev-yrDiag,
                   agePrev=ageDiag+period) %>%
     dplyr::arrange(ageDiag , yrDiag)
@@ -113,25 +115,25 @@ format_survival <- function(data, # Survival data to be formatted
     } else {
       message("Applying population-level survival \n")
     }
-    if(any(!names(life.table) %in% c("period", "ageDiag", "expected"))){
-      stop("Life tables must contain 'period', 'ageDiag', and 'expected' columns \n")
+    if(any(!c("period", "agePrev", "Expected") %in% names(life.table))){
+      stop("Life tables must contain 'period', 'agePrev', and 'Expected' columns \n")
     }
     
     life.table <- life.table %>% 
       dplyr::mutate_all(as.numeric) %>%
-      dplyr::select(period, ageDiag, expected) %>%
+      dplyr::select(period, agePrev, Expected,yrPrev) %>%
       dplyr::arrange(desc(period)) %>%
       dplyr::filter(period <= length(years) & 
-             ageDiag %in% ages)
+                      agePrev %in% ages)
     
     full.survival.temp1 <- skeleton  %>%
       dplyr::left_join(new, by=names(skeleton)) %>%
       dplyr::mutate_all(as.numeric) %>%
-      dplyr::left_join(life.table %>% dplyr::mutate_all(as.numeric), by = c("ageDiag", "period"))  %>%
-      dplyr::mutate(expected = dplyr::case_when(agePrev>=100 ~ 0,
-                                         TRUE~expected),
+      dplyr::left_join(life.table %>% dplyr::mutate_all(as.numeric), by = c("agePrev", "period","yrPrev"))  %>%
+      dplyr::mutate(Expected = dplyr::case_when(agePrev>=100 ~ 0,
+                                         TRUE~Expected),
                     survival = dplyr::case_when(!is.na(survival)~survival,
-                                         TRUE~expected)) 
+                                         TRUE~Expected)) 
     
     full.survival.temp2 <- full.survival.temp1  %>%
       dplyr::filter(period >= (years.observed.surv)) %>%
@@ -145,7 +147,7 @@ format_survival <- function(data, # Survival data to be formatted
       dplyr::filter(period <= years.observed.surv) %>%
       dplyr::bind_rows(full.survival.temp2 %>% dplyr::filter(period > years.observed.surv)) %>%
       dplyr::arrange(ageDiag, period) %>%
-      dplyr::select(-expected)
+      dplyr::select(-Expected)
 
   } else if (assumption=="nosurvival") {
     message("Applying no survival assumption \n")
