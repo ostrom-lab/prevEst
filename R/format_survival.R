@@ -4,9 +4,8 @@
 #' @param data Survival dataframe
 #' @param ages Numeric vector
 #' @param years Numeric vector
+#' @param SurvType Specify observed or expected survival
 #' @param prevYear Numeric vector
-#' @param Observed.Surv Logical
-#' @param Expected.Surv Logical
 #' @param assumption Named character vector
 #' @param life.table Dataframe of SEER life table
 #' @param years.observed.surv numeric
@@ -25,9 +24,7 @@
 #' format_survival(survival,
 #'                 ages = c(0:85),
 #'                 years = c(2015:2018),
-#'                 SurvType= c("Observed")
-#'                 Observed.Surv = TRUE,
-#'                 Expected.Surv = FALSE,
+#'                 SurvType= c("Observed"),
 #'                 assumption = "nosurvival",
 #'                 years.observed.surv = NULL,
 #'                 names = c("ageDiag" = "ageDiag",
@@ -39,8 +36,7 @@
 #' format_survival(survival,
 #'                 ages = c(0:85),
 #'                 years = c(1995:2018),
-#'                 Observed.Surv = TRUE,
-#'                 Expected.Surv = FALSE,
+#'                 SurvType= c("Observed"),
 #'                 assumption = "population",
 #'                 names = c("ageDiag" = "ageDiag",
 #'                           "yrDiag" = "yrDiag",

@@ -12,7 +12,8 @@ fig_height: 6
 ---
 
 ```{r setup, include = FALSE, warning=F}
-library(tidyverse)
+requireNamespace(tidyverse,SEER2R)
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE, 

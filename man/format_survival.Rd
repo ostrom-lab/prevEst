@@ -10,8 +10,11 @@ format_survival(
   years = NULL,
   prevYear = NULL,
   assumption = "nosurvival",
+  years.observed.surv = NULL,
+  SurvType = "Observed",
   life.table = NULL,
-  names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", Observed = "Observed"),
+  names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", Observed = "Observed", Expected =
+    "Expected"),
   keepExtraCols = FALSE
 )
 }
@@ -25,6 +28,10 @@ format_survival(
 \item{prevYear}{Numeric vector}
 
 \item{assumption}{Named character vector}
+
+\item{years.observed.surv}{numeric}
+
+\item{SurvType}{Specify observed or expected survival}
 
 \item{life.table}{Dataframe of SEER life table}
 
@@ -51,19 +58,24 @@ data(life.table)
 format_survival(survival,
                 ages = c(0:85),
                 years = c(2015:2018),
+                SurvType= c("Observed"),
                 assumption = "nosurvival",
+                years.observed.surv = NULL,
                 names = c("ageDiag" = "ageDiag",
                           "yrDiag" = "yrDiag",
-                          "Observed" = "survival"),
+                          "Observed" = "survival",
+                          "Expected" = "Expected"),
                 keepExtraCols = FALSE)
                 
 format_survival(survival,
                 ages = c(0:85),
                 years = c(1995:2018),
+                SurvType= c("Observed"),
                 assumption = "population",
                 names = c("ageDiag" = "ageDiag",
                           "yrDiag" = "yrDiag",
-                          "Observed" = "survival"),
+                          "Observed" = "survival",
+                          "Expected" = "Expected"),
                 life.table = life.table,
                 keepExtraCols = FALSE)
 

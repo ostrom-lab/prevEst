@@ -2,7 +2,7 @@
 % Please edit documentation in R/regPrev.R
 \name{regPrev}
 \alias{regPrev}
-\title{Estimate complete prevalence}
+\title{Estimate complete incidence}
 \usage{
 regPrev(incidence, incidence_est, regYr = NULL, durationYr = NULL)
 }
@@ -19,7 +19,7 @@ regPrev(incidence, incidence_est, regYr = NULL, durationYr = NULL)
 An incidence dataframe for the years provided.
 }
 \description{
-Estimate complete prevalence
+Estimate complete incidence
 }
 \examples{
 

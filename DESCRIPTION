@@ -27,16 +27,20 @@ Authors@R:
         comment = c("ORCID" = "0000-0001-6369-0609"))
 			)
 Description: Prevalence is an estimate of the total number of living persons with a disease regardless of when they were diagnosed. Specifically, complete prevalence is the measure of people remaining alive regardless of the time of diagnosis. This is calculated using incidence and overall survival. This prackage provides useful functions for estimating complete prevalence from survival and incidence data. This package uses methods outlined in Zhang et al., (2017). "Complete prevalence of malignant primary brain tumors registry data in the United States compared with other common cancers, 2010."
-License: `use_gpl3_license()`
+License: use_gpl3_license()
 Depends: R (>= 4.0.0)
 Imports: 
 	dplyr,
-	tidyr, 
 	purrr,
+	tidyr,
 	modelr,
 	betareg,
 	asht
+Suggests:
+  utils,
+  SEER2R,
+VignetteBuilder: utils
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3

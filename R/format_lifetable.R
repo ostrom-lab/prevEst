@@ -2,25 +2,21 @@
 #'
 #' @description This function formats life table data for ease of use with functions included in this package. 
 #' @param data Incidence dataframe
-#' @param ages Numeric vector
-#' @param years Numeric vector
 #' @param names Named character vector
-#' @param keepExtraCols Logical
 #' @details Survival projection functions in prevEst  requires properly formatted life table data. This function, the counterpart to [format_incidence()] and [format_survival()], is designed 
 #' to take SEER-like life table data and format it for the [prevEst()] function. Four columns are necessary: 1) age, 2) year, 3) survival interval (in years), 
 #' and 4) expected interval survival. While these functions are not mandatory, they help prepare the data for [prevEst()] with simple transformation steps.
 #' @return A formatted life table dataframe.
 #' @examples
 #' 
-#' data(life.tables)
-#' format_lifetable(life.tables,
+#' format_lifetable(life.table.raw,
 #'                   names = c("age" = "age",
 #'                           "year" = "yr",
 #'                           "interval" = "period",
 #'                           "Expected"="Expected_Interval"))
 #'
 #'
-#'#' @seealso [format_incidence()] The analogous function that formats incidence data
+#' @seealso [format_incidence()] The analogous function that formats incidence data
 #' @seealso [format_survival()] The analogous function that formats survival data
 #' @export
 
