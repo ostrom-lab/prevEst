@@ -129,7 +129,7 @@ prevEst <- function(
       dplyr::left_join(standard.population, by = c("agePrev" = "age")) %>%
       dplyr::group_by(agePrev) %>%
       dplyr::mutate(crude_rate = prevalence/census_population*100000,
-             weights = standard_population/sum(standard.population$standard_population),
+             weights = standard_population/sum(.$standard_population),
              adjusted_rate = crude_rate*weights,
              adjusted_lci = asht::wspoissonTest(prevalence, w = as.numeric(weights)/as.numeric(census_population), wmtype = "tcz", mult=100000)$conf.int[[1]],
              adjusted_uci = asht::wspoissonTest(prevalence, w = as.numeric(weights)/as.numeric(census_population), wmtype = "tcz", mult=100000)$conf.int[[2]]) %>%
@@ -137,5 +137,6 @@ prevEst <- function(
       dplyr::arrange(as.numeric(agePrev))
     }
   
-  return(prevest %>% dplyr::mutate_all(as.numeric) %>% filter(agePrev >= 0) %>% arrange(agePrev))  
+  return(prevest %>% dplyr::mutate_all(as.numeric) %>% 
+           dplyr::filter(agePrev >= 0) %>% arrange(agePrev))  
 }

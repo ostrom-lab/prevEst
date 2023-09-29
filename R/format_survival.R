@@ -87,7 +87,7 @@ format_survival <- function(data, # Survival data to be formatted
     dplyr::filter(yrDiag %in% years & yrPrev == prevYear) %>%
     dplyr::mutate(period = yrPrev-yrDiag,
            agePrev = ageDiag+period,
-           survival = dplyr::case_when(survival>1 ~ survival/100,
+           survival = dplyr::case_when(any(survival) ~ survival/100,
                                 TRUE ~ survival)) %>%
     dplyr::arrange(yrDiag, ageDiag)
   
