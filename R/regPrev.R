@@ -2,8 +2,8 @@
 #'
 #' @param incidence Incomplete incidence dataframe containing age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), and count of new cases (named "count)
 #' @param incidence_est Estimated incidence dataframe for smaller population area (with longer follow-up) containing all years with age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), and count of new cases (named "count)
-#' @param regYr Years to do regression on i.e. c(2000:2010)
-#' @param durationYr Years that require estimates from regression
+#' @param regYr Years to do regression on i.e. c(2000:2010). If not specified, will default to all overlapping years in both datasets.
+#' @param durationYr Years that require estimates from regression. If not specified, will default to years present in only estimated incidence data frame.
 #' @return An incidence dataframe for the years provided.
 #' @examples
 #' 
@@ -38,8 +38,8 @@ regPrev <- function(
   if(is.null(durationYr) & is.null(regYr)){
     message("Guessing durationYr and regYr as they are not specified. \n")
     # Guess years for regression
-    durationYr <- unique(incidence$yrDiag)
-    regYr <- setdiff(durationYr, unique(incidence_est$yrDiag))
+    regYr <- intersect(unique(incidence$yrDiag),unique(incidence_est$yrDiag))
+    durationYr <- setdiff(unique(incidence_est$yrDiag),regYr)
   }
   # Linear regression and resulting diagnostic statistics
   regprev <- idf %>%
@@ -65,7 +65,6 @@ regPrev <- function(
     dplyr::bind_rows(idf  %>% dplyr::filter(yrDiag %in% regYr) %>% dplyr::rename(c("count"="count.x")) %>%  dplyr::select(ageDiag, yrDiag, count)) %>%
     dplyr::arrange(ageDiag, yrDiag) %>%
     dplyr::mutate(count = ifelse(as.numeric(count) <= 0, 0, round(count)))
-  
   
   return(regprev)
 }

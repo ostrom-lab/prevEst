@@ -78,7 +78,7 @@ format_survival <- function(data, # Survival data to be formatted
   new <- data.frame(ageDiag  = as.numeric(gsub("\\D", "", data[[names[["ageDiag"]]]])),
                     yrDiag = as.numeric(gsub("\\D", "", data[[names[["yrDiag"]]]])),
                     yrPrev = as.numeric(gsub("\\D", "", data[[names[["yrPrev"]]]])),
-                    survival = as.numeric(data[[names[["Observed"]]]])) %>%
+                    survival = as.numeric(data[[names[[SurvType]]]])) %>%
     dplyr::distinct(.keep_all=TRUE) %>%
     dplyr::filter(yrDiag %in% years & yrPrev == prevYear) %>%
     dplyr::mutate(period = yrPrev-yrDiag,

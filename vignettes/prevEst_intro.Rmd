@@ -12,7 +12,9 @@ fig_height: 6
 ---
 
 ```{r setup, include = FALSE, warning=F}
-requireNamespace(tidyverse,SEER2R)
+require(tidyverse)
+
+library(tidyverse)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -21,6 +23,9 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
+  `%>%` <- dplyr::`%>%`
+  
+
 list.files("../R", "*.R", full.names = T) %>%
   sapply(source)
 
@@ -28,12 +33,12 @@ c(list.files("../data", full.names = T), "../R/sysdata.rda") %>%
   sapply(.,load,.GlobalEnv)
 
 plot.theme <- 
-  theme(axis.text = element_text(colour="black"),
-        axis.title = element_text(colour="black",face="bold"),
-        panel.grid = element_blank(),
-        panel.background = element_blank(),
-        strip.text = element_text(colour="black",face="bold"),
-        strip.background = element_blank())
+  ggplot2::theme(axis.text =  ggplot2::element_text(colour="black"),
+        axis.title =  ggplot2::element_text(colour="black",face="bold"),
+        panel.grid =  ggplot2::element_blank(),
+        panel.background =  ggplot2::element_blank(),
+        strip.text =  ggplot2::element_text(colour="black",face="bold"),
+        strip.background =  ggplot2::element_blank())
 
 ```
 
@@ -61,7 +66,7 @@ For observed survival proportions use the survival session with the recommended 
 While we can't provide SEER data, dummy data resembling SEER data has been included in the package. The bottom 10 rows of the **incidence** dataset are shown.
 
 ```{r read in data, echo=TRUE, message=FALSE, eval=FALSE}
-library(SEER2R)
+
 library(tidyverse)
 
 data(incidence)
@@ -83,7 +88,7 @@ For life table data, use the survival  session with the recommended settings as 
 
 Next we will load in the dummy life table data and look at its structure. 
 
-```{r, echo=TRUE, eval = T}
+```{r life table example, echo=TRUE, eval = T}
 data(life.table)
   
 tail(life.table, 10)
@@ -94,7 +99,7 @@ The probabilities shown are expected (i.e. average total-population mortality) r
 ## Preparing Incidence Data
 Now we can start by preparing the incidence data for the prevEst() function. We will start with cleaning both incidence data sources, **incidence** and **incidence_est**. **Incidence** represents data from a data source that covers your entire population of interest but not for the entire period of interest. The **incidence_est** data, on the other hand, covers your entire period of interest, but not the whole population. For both of these data sources, we will use the ``format_incidence()`` function to prepare the data. This function is a light wrapper of some simple data cleaning tasks.
 
-```{r echo=TRUE}
+```{r reformat incidence files, echo=TRUE}
 incidence_reformat <- format_incidence(data = mutate_all(incidence, as.numeric),
                                        ages = 0:85,
                                        years = 2004:2018,
@@ -122,7 +127,7 @@ As the names imply, ageDiag is the age at which a case was diagnosed, yrDiag is 
 ## Using the ``regprev()`` Function
 Now that we have both of our incidence sources formatted, it is time to combine them to complete our complete incidence estimate. By default, it will use all years that both datasets have in common, but you can choose which years to regress or use for model building as this may be more appropriate for some cases. This is especially the case if you have reasons to believe that certain years in your incidence data may be unreliable even if present.
 
-``` {r echo=TRUE}
+``` {r generate complete incidence, echo=TRUE}
 complete_incidence_reformat <- regPrev(incidence_reformat, 
                                        incidence_est_reformat, 
                                        regYr = 2004:2019, 
@@ -144,11 +149,13 @@ In order to project survival beyond what has been observed, assumptions must be 
 Population survival assumes that survival continues to decline outside of the periods available based on the provided population life-tables.
 This first assumption is that for the years where a disparity exist, the missing years can be estimated using population life (actuarial) tables. When this is the case, provide the life tables as shown above to the corresponding argument.
 
-``` {r echo=TRUE}
+``` {r format survival, echo=TRUE}
 survival <- survival %>%
   filter(period + yrDiag == 2018)
 
-popsurvival_reformat <- format_survival(data=survival,
+data(survival_unformatted)
+
+popsurvival_reformat <- format_survival(data=survival_unformatted,
                                      ages = 0:85,
                                        years = 1975:2019,
                                        prevYear = 2019,
