@@ -15,6 +15,7 @@
 
 
 project_incidence <- function(data,
+                              data.years=NULL,
                               projection.years = NULL,
                               method = "poisson") {
 
@@ -25,6 +26,10 @@ project_incidence <- function(data,
   incidence <- data %>%
     dplyr::select(c("ageDiag", "yrDiag","count"))
 
+  if(is.null(data.years)) {
+    data.years <- min(incidence$yrDiag):max(incidence$yrDiag)
+  }
+  
   if(is.null(projection.years)) {
     stop("Please specify years for projections. \n")
   }
@@ -32,6 +37,7 @@ project_incidence <- function(data,
   cat("Projecting incidence for",min(projection.years),"-",max(projection.years), "\n")
 
   proj.inc <- incidence %>%
+    dplyr::filter(yrDiag %in% data.years) %>%
     dplyr::group_by(ageDiag  ) %>%
     tidyr::nest() %>%
     dplyr::mutate(predicted_incidence=purrr::map(data, ~modelr::add_predictions(data=data.frame(yrDiag  = projection.years),
