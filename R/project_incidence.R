@@ -39,10 +39,29 @@ project_incidence <- function(data,
   proj.inc <- incidence %>%
     dplyr::filter(yrDiag %in% data.years) %>%
     dplyr::group_by(ageDiag  ) %>%
-    tidyr::nest() %>%
+    tidyr::nest()
+  
+  if(method == "poisson") {
+    proj.inc <- proj.inc %>%
     dplyr::mutate(predicted_incidence=purrr::map(data, ~modelr::add_predictions(data=data.frame(yrDiag  = projection.years),
                                                                                 glm(count ~ as.numeric(yrDiag) , family=method, data = .x),
-                                                                                var="count",type="response"))) %>%
+                                                                                var="count",type="response"))) 
+    }
+  if(method == "linear") {
+    proj.inc <- proj.inc %>%
+      dplyr::mutate(predicted_incidence=purrr::map(data, ~modelr::add_predictions(data=data.frame(yrDiag  = projection.years),
+                                                                                  lm(count ~ as.numeric(yrDiag) , data = .x),
+                                                                                  var="count",type="response"))) 
+  }
+  if(method == "zeroinf") {
+    proj.inc <- proj.inc %>%
+      dplyr::mutate(predicted_incidence=purrr::map(data, ~modelr::add_predictions(data=data.frame(yrDiag  = projection.years),
+                                                                                  pscl::zeroinfl(count ~ as.numeric(yrDiag) | 1 , data = .x),
+                                                                                  var="count",type="response"))) 
+  }
+  
+  
+  proj.inc <- proj.inc %>%
     dplyr::select(-data) %>%
     tidyr::unnest(cols=predicted_incidence) %>%
     dplyr::mutate(count=dplyr::case_when(as.numeric(count)<0~0,
