@@ -9,7 +9,6 @@
 #' @param adjust Logical. If TRUE, rates will be age-adjusted
 #' @param grouped_ages Logical. If TRUE, multi-year age groups are used for adjustment.
 #' @param groups If grouped ages are used, vector of grouped age levels contain the lowest group in each age group is selected
-#' @param sex_specific character string containing sex ("Male" or "Female" if requesting sex-specific rates)
 #'
 #' @return A dataframe with estimated prevalence by age at prevalence. If incidence data is grouped (as in the sample data),
 #' then it will assume that all cases in the group (e.g. ages 0-4) have the same rates of survival. 
@@ -46,7 +45,7 @@ prevEst <- function(
   grouped_ages = F,                                        # If ages are grouped (i.e. 5-year age bands), then this should be TRUE
   groups = NULL,                                           # Vector of grouped age levels containing the lowest age in each group,
                                                            # (e.g. if using 5-year age bands starting at age = 0, the vector would look like c(0, 5, 10, 15, etc.))
-  sex_specific = "Both sexes"                              # Use sex-specific statistics for rates? If so, choose "Male" or "Female"
+
   )
 
 {

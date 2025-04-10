@@ -1,8 +1,8 @@
 #' Project incidence for unobserved year(s)
 #'
-#' @param data Incidence dataframe for which prevalence is to be projected
+#' @param data Incidence dataframe for which incidence is to be projected
 #' @param data.years years covered by incidence years data.frame (if not specified will use all years in the data)
-#' @param projection.years Numeric vector of years to project prevalence for
+#' @param projection.years Numeric vector of years to project incidence for
 #' @param method GLM family to be base predictions off of
 #' @return Predicted survival proportions for \code{years}
 #' @return Projected incidence dataframe including projection years
@@ -64,7 +64,6 @@ project_incidence <- function(data,
                                                                                   pscl::zeroinfl(count ~ as.numeric(yrDiag) | 1 , data = .x),
                                                                                   var="count",type="response"))) 
   }
-  
   
   proj.inc <- proj.inc %>%
     dplyr::select(-data) %>%
