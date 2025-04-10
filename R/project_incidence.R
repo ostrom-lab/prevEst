@@ -1,6 +1,7 @@
 #' Project incidence for unobserved year(s)
 #'
 #' @param data Incidence dataframe for which prevalence is to be projected
+#' @param data.years years covered by incidence years data.frame (if not specified will use all years in the data)
 #' @param projection.years Numeric vector of years to project prevalence for
 #' @param method GLM family to be base predictions off of
 #' @return Predicted survival proportions for \code{years}
@@ -8,7 +9,9 @@
 #' @examples
 #' \dontrun{
 #' project_incidence(data=complete_incidence,
-#'                   final.year=2030)
+#' data.years=NULL,
+#' projection.years = NULL,
+#' method = "poisson")
 #'}
 #' @seealso [project_survival()] The analogous function that projects survival data
 #' @export
@@ -19,6 +22,8 @@ project_incidence <- function(data,
                               projection.years = NULL,
                               method = "poisson") {
 
+  yrDiag <- ageDiag <- predicted_incidence <- NULL
+  
   options(dplyr.summarise.inform = FALSE)
   `%>%` <- dplyr::`%>%`
 

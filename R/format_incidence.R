@@ -13,12 +13,13 @@
 #' @examples
 #' 
 #' data(incidence)
-#' format_incidence(incidence,
+#' format_incidence(data=incidence,
 #'                   ages = seq(0, 85, 5),
 #'                   years = c(2010:2018),
 #'                   names = c("ageDiag" = "ageDiag",
 #'                           "yrDiag" = "yrDiag",
-#'                           "incidence" = "count"))
+#'                           "incidence" = "count"),
+#'                            keepExtraCols=FALSE)
 #'
 #'
 #' @seealso [format_survival()] The analogous function that formats survival data
@@ -32,28 +33,30 @@ format_incidence <- function(data,                # A dataframe of counts for ea
                                        "incidence" = "count"), # A vector of names containing 1) age, 2) year, and 3) counts, of the form list("age" = ..., "year" = ..., etc.)
                              keepExtraCols=FALSE
 )  {
+ 
+   ageDiag <- yrDiag <-  inc.y <- inc.x <-  NULL
   
   `%>%` <- dplyr::`%>%`
-
+  
   options(dplyr.summarise.inform = FALSE)
   new <- data.frame(ageDiag = data[[names[["ageDiag"]]]],
                     yrDiag = as.numeric(data[[names[["yrDiag"]]]]),
                     inc = as.numeric(data[[names[["incidence"]]]])) 
-
+  
   if( keepExtraCols==TRUE) {
     new <- new %>%
       dplyr::bind_cols(data %>% dplyr::select(-names))
   }
-
-skeleton <- tidyr::expand_grid(ageDiag = ages,
-                               yrDiag =  as.numeric(years),
-                        inc = as.numeric(0)) %>%
-  dplyr::arrange(ageDiag, yrDiag)
-
-final <-  dplyr::left_join(skeleton, new, by = c("ageDiag", "yrDiag")) %>%
-  dplyr::mutate(count = ifelse(inc.y == 0, inc.x, inc.y)) %>%
-  dplyr::select(-c(inc.y, inc.x)) %>%
-  dplyr::arrange(ageDiag, yrDiag)
-
-return(as.data.frame(final))
+  
+  skeleton <- tidyr::expand_grid(ageDiag = ages,
+                                 yrDiag =  as.numeric(years),
+                                 inc = as.numeric(0)) %>%
+    dplyr::arrange(ageDiag, yrDiag)
+  
+  final <-  dplyr::left_join(skeleton, new, by = c("ageDiag", "yrDiag")) %>%
+    dplyr::mutate(count = ifelse(inc.y == 0, inc.x, inc.y)) %>%
+    dplyr::select(-c(inc.y, inc.x)) %>%
+    dplyr::arrange(ageDiag, yrDiag)
+  
+  return(as.data.frame(final))
 }

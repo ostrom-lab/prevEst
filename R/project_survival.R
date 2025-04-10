@@ -4,6 +4,7 @@
 #' @param ages Numeric vector of ages to be included
 #' @param observation.years Numeric vector of observed years to build the model on
 #' @param projection.years Numeric vector of years to predict survival for
+#' @param prevYear Year for which prevalence is being estimated
 #' @param assumption Named character, either "population" or "nosurvival"
 #' @param life.table Dataframe of SEER life table
 #' @param names Named character vector pointing to column names
@@ -15,12 +16,14 @@
 #'                  ages= 0:85,
 #'                  observation.years = NULL,               # A vector of years to build the model on
 #'                  projection.years = NULL,
+#'                  prevYear = NULL,
 #'                  assumption = "population",
 #'                  life.table = life.tables,
 #'                  names = c("ageDiag"="Age_recode_with_single_ages_and_85",
 #'                            "yrPrev"="yrPrev",
 #'                            "yrDiag"="Year_of_diagnosis",
-#'                            "Observed"="Observed"))
+#'                            "Observed"="Observed"),
+#'                  keepExtraCols=FALSE)
 #'}
 #' @seealso [prevEst::project_incidence()]
 #' @export
@@ -40,6 +43,8 @@ project_survival <- function(data,                # Case listing survival data, 
 ){
   options( dplyr.summarise.inform = FALSE)
   `%>%` <- dplyr::`%>%`
+  
+  yrDiag <- ageDiag <- predicted_incidence <- yrPrev <- yrDiag <- ageDiag <- Expected <- period <- predicted_survival <- agePrev <- desc <- survival <- NULL
   
   if(is.null(observation.years)) {
     stop("Please specify years for observations.")

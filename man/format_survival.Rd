@@ -13,8 +13,8 @@ format_survival(
   years.observed.surv = NULL,
   SurvType = "Observed",
   life.table = NULL,
-  names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", Observed = "Observed", Expected =
-    "Expected"),
+  names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", yrPrev = "yrPrev", period = "period",
+    Observed = "Observed", expected = "Expected"),
   keepExtraCols = FALSE
 )
 }
@@ -55,7 +55,7 @@ and 3) the observed survival for the combination of the two. While these functio
 data(survival)
 data(life.table)
 
-format_survival(survival,
+format_survival(data=survival,
                 ages = c(0:85),
                 years = c(2015:2018),
                 SurvType= c("Observed"),
@@ -67,15 +67,17 @@ format_survival(survival,
                           "Expected" = "Expected"),
                 keepExtraCols = FALSE)
                 
-format_survival(survival,
+format_survival(data=survival,
                 ages = c(0:85),
                 years = c(1995:2018),
                 SurvType= c("Observed"),
                 assumption = "population",
                 names = c("ageDiag" = "ageDiag",
                           "yrDiag" = "yrDiag",
+                          "yrPrev"="yrPrev",
+                          "period"="period",
                           "Observed" = "survival",
-                          "Expected" = "Expected"),
+                          "expected" = "Expected"),
                 life.table = life.table,
                 keepExtraCols = FALSE)
 

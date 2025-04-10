@@ -37,12 +37,13 @@ and 3) the reported incidence for that combination of the two. While these funct
 \examples{
 
 data(incidence)
-format_incidence(incidence,
+format_incidence(data=incidence,
                   ages = seq(0, 85, 5),
                   years = c(2010:2018),
                   names = c("ageDiag" = "ageDiag",
                           "yrDiag" = "yrDiag",
-                          "incidence" = "count"))
+                          "incidence" = "count"),
+                           keepExtraCols=FALSE)
 
 
 }

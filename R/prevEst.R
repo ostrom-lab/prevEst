@@ -50,6 +50,9 @@ prevEst <- function(
   )
 
 {
+  
+  yrDiag <- ageDiag <- agePrev <- count <- final <- prevalence <- sex <- age <- census_population <- standard_population <- crude_rate <- weights <- NULL
+  
   options(dplyr.summarise.inform = FALSE)
   `%>%` <- dplyr::`%>%`
   
@@ -123,7 +126,7 @@ prevEst <- function(
         }
 
     prevest <- prevest %>%
-      dplyr::mutate(prevalence = ifelse(agePrev >= 85, sum(.$prevalence[which(.$agePrev >= 85)]), prevalence)) %>%
+      dplyr::mutate(prevalence = ifelse(agePrev >= 85, sum(prevest$prevalence[which(prevest$agePrev >= 85)]), prevalence)) %>%
       dplyr::filter(agePrev <= 85) %>%
       dplyr::left_join(census.population, by = c("agePrev" = "age")) %>%
       dplyr::left_join(standard.population, by = c("agePrev" = "age")) %>%
@@ -138,5 +141,5 @@ prevEst <- function(
     }
   
   return(prevest %>% dplyr::mutate_all(as.numeric) %>% 
-           dplyr::filter(agePrev >= 0) %>% arrange(agePrev))  
+           dplyr::filter(agePrev >= 0) %>% dplyr::arrange(agePrev))  
 }

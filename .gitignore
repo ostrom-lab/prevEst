@@ -10,3 +10,5 @@
 .ssm
 .sfm
 .Rproj
+inst/doc
+docs

@@ -11,9 +11,9 @@ regPrev(incidence, incidence_est, regYr = NULL, durationYr = NULL)
 
 \item{incidence_est}{Estimated incidence dataframe for smaller population area (with longer follow-up) containing all years with age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), and count of new cases (named "count)}
 
-\item{regYr}{Years to do regression on i.e. c(2000:2010)}
+\item{regYr}{Years to do regression on i.e. c(2000:2010). If not specified, will default to all overlapping years in both datasets.}
 
-\item{durationYr}{Years that require estimates from regression}
+\item{durationYr}{Years that require estimates from regression. If not specified, will default to years present in only estimated incidence data frame.}
 }
 \value{
 An incidence dataframe for the years provided.

@@ -23,6 +23,8 @@ regPrev <- function(
     regYr = NULL,
     durationYr = NULL
 ){
+  ageDiag <- yrDiag <- data <- model <- predicted_incidence <- count.x <- count_pred <- count <- ageDiag <- period <- NULL
+  
   `%>%` <- dplyr::`%>%`
   
   incidence <- incidence %>%
@@ -51,7 +53,7 @@ regPrev <- function(
                                                                           count.x = dplyr::case_when(all(is.na(count.x)) & all(is.na(count.y)) ~ 0,
                                                                                                      all(is.na(count.x)) ~ count.y,
                                                                                                      T ~ count.x))),
-                  model = purrr::map(data, function(x) lm(count.x ~ count.y, data = x %>% dplyr::filter(yrDiag %in% regYr))),
+                  model = purrr::map(data, function(x) stats::lm(count.x ~ count.y, data = x %>% dplyr::filter(yrDiag %in% regYr))),
                   predicted_incidence = purrr::map2(data,
                                                     model,
                                                     ~modelr::add_predictions(data = as.data.frame(.x  %>% dplyr::filter(yrDiag %in% durationYr)),

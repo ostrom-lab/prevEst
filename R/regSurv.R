@@ -21,6 +21,9 @@ regSurv <- function(
               "observed" = "survival"),
     life.table
   ){
+  
+  ageDiag <- period <- var <- expected <- yrDiag <- data <- observed <- surv_pred <- survival <-  NULL
+  
   `%>%` <- dplyr::`%>%`
   
   surv <- 
@@ -64,15 +67,13 @@ regSurv <- function(
       }
       return(x)
     }
-    
-
     regsurv <- surv %>%
       dplyr::arrange(ageDiag, yrDiag) %>%
       dplyr::group_by(ageDiag) %>%
       tidyr::nest() %>%
       dplyr::mutate(predicted_surv = purrr::map(data, ~expector(.x))) %>%   
       dplyr::select(-data) %>%
-      tidyr::unnest(everything()) %>%
+      tidyr::unnest(tidyselect::everything()) %>%
       dplyr::mutate(survival = round(ifelse(is.na(observed), surv_pred, observed), 3)) %>%
       dplyr::ungroup() %>%
       dplyr::select(ageDiag, yrDiag, survival, period) 

@@ -1,6 +1,6 @@
 Package: prevEst
 Title: Useful functions for estimating complete prevalence using incidence and survival statistics
-Version: 2.0
+Version: 2.0.1
 Authors@R: 
 	c(person(given = "Adah",
         family = "Zhang",
@@ -30,17 +30,23 @@ Description: Prevalence is an estimate of the total number of living persons wit
 License: use_gpl3_license()
 Depends: R (>= 4.0.0)
 Imports: 
-	dplyr,
-	purrr,
-	tidyr,
-	modelr,
-	betareg,
-	asht
+    dplyr,
+    purrr,
+    tidyr,
+    modelr,
+    betareg,
+    asht,
+    pscl
 Suggests:
-  utils,
-  SEER2R,
-VignetteBuilder: utils
+    utils,
+    SEER2R,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: utils, knitr
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
+Config/testthat/edition: 3
+URL: https://ostrom-lab.github.io/prevEst/

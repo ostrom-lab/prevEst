@@ -4,7 +4,7 @@ author: "Corey Neff, Quinn T. Ostrom, and Mackenzie Price"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Simple prevEst workflow}
+  %\VignetteIndexEntry{Introduction to prevEst}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 fig_width: 9 
@@ -12,9 +12,8 @@ fig_height: 6
 ---
 
 ```{r setup, include = FALSE, warning=F}
-require(tidyverse)
 
-library(tidyverse)
+require(tidyverse)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -43,8 +42,6 @@ plot.theme <-
 ```
 
 
-
-
 ## Importing Incidence and Survival Data
 
 For cancer registry data that is available in SEER\*Stat (e.g. SEER, USCS, NAACCR data) it is easy to generate underlying data files. The sample data provided in the package is based off output one might retrieve from SEER\*Stat. Similar data may be obtained as follows:
@@ -65,8 +62,8 @@ For observed survival proportions use the survival session with the recommended 
 
 While we can't provide SEER data, dummy data resembling SEER data has been included in the package. The bottom 10 rows of the **incidence** dataset are shown.
 
-```{r read in data, echo=TRUE, message=FALSE, eval=FALSE}
-
+```{r read in data, eval=TRUE, echo=TRUE, message=FALSE}
+require(tidyverse)
 library(tidyverse)
 
 data(incidence)
@@ -97,10 +94,27 @@ tail(life.table, 10)
 The probabilities shown are expected (i.e. average total-population mortality) relative survival rates, such for any combination of age at diagnosis and length of time, the survival probability corresponds to the probability that that person will live an additional year. For example, among all people who were 65 years old 10 years ago (i.e. 75 years old now), there is a `r round(life.table[which(life.table$ageDiag == 85 & life.table$period == 10),]$expected, 3)*100`% chance they will live an additional year.
 
 ## Preparing Incidence Data
-Now we can start by preparing the incidence data for the prevEst() function. We will start with cleaning both incidence data sources, **incidence** and **incidence_est**. **Incidence** represents data from a data source that covers your entire population of interest but not for the entire period of interest. The **incidence_est** data, on the other hand, covers your entire period of interest, but not the whole population. For both of these data sources, we will use the ``format_incidence()`` function to prepare the data. This function is a light wrapper of some simple data cleaning tasks.
+
+Now we can start by preparing the incidence data for the prevEst() function. We will start with cleaning both incidence data sources, **incidence** and **incidence_est**. **Incidence** represents data from a data source that covers your entire population of interest but not for the entire period of interest. The **incidence_est** data, on the other hand, covers your entire period of interest, but not the whole population. 
+
+First,  we will load in the two dummy incidence data and look at its structure. 
+
+```{r incidence example, echo=TRUE, eval = T}
+
+data(incidence)
+tail(incidence, 10)
+
+data(incidence_est)
+tail(incidence_est, 10)
+
+```
+
+For both of these data sources, we will use the ``format_incidence()`` function to prepare the data. This function is a light wrapper of some simple data cleaning tasks.
 
 ```{r reformat incidence files, echo=TRUE}
-incidence_reformat <- format_incidence(data = mutate_all(incidence, as.numeric),
+
+incidence <- dplyr::mutate_all(incidence, as.numeric)
+incidence_reformat <- format_incidence(data = incidence,
                                        ages = 0:85,
                                        years = 2004:2018,
                                        names = c("ageDiag"="ageDiag",
@@ -156,14 +170,16 @@ survival <- survival %>%
 data(survival_unformatted)
 
 popsurvival_reformat <- format_survival(data=survival_unformatted,
-                                     ages = 0:85,
-                                       years = 1975:2019,
-                                       prevYear = 2019,
-                                     assumption = "population",
-                                     life.table = life.table,
-                                     names = c("ageDiag"="ageDiag",
-                                              "yrDiag"="yrDiag",
-                                              "Observed"="survival"))   
+                                        ages = 0:85,
+                                        years = 1975:2019,
+                                        prevYear = 2019,
+                                        assumption = "population",
+                                        SurvType = "Observed",
+                                        life.table = life.table,
+                                        names = c("ageDiag"="ageDiag",
+                                                  "yrDiag"="yrDiag",
+                                                  "yrPrev"="yrPrev",
+                                                  "Observed"="Observed"))   
 tail(popsurvival_reformat)
 ```
 

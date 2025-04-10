@@ -6,7 +6,7 @@
 \usage{
 format_lifetable(
   data,
-  names = c(age = "age", year = "yr", interval = "period", Expected =
+  names = c(age = "age", year = "yr", interval = "period", expected =
     "Expected_Interval")
 )
 }
@@ -28,11 +28,11 @@ and 4) expected interval survival. While these functions are not mandatory, they
 }
 \examples{
 
-format_lifetable(life.table.raw,
+format_lifetable(data,
                   names = c("age" = "age",
                           "year" = "yr",
                           "interval" = "period",
-                          "Expected"="Expected_Interval"))
+                          "expected"="Expected_Interval"))
 
 
 }

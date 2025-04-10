@@ -9,6 +9,7 @@ project_survival(
   ages,
   observation.years = NULL,
   projection.years = NULL,
+  prevYear = NULL,
   assumption = "nosurvival",
   life.table = NULL,
   names = c(ageDiag = "ageDiag", yrPrev = "yrPrev", yrDiag = "yrDiag", Observed =
@@ -24,6 +25,8 @@ project_survival(
 \item{observation.years}{Numeric vector of observed years to build the model on}
 
 \item{projection.years}{Numeric vector of years to predict survival for}
+
+\item{prevYear}{Year for which prevalence is being estimated}
 
 \item{assumption}{Named character, either "population" or "nosurvival"}
 
@@ -45,12 +48,14 @@ project_survival(data=raw.survival,
                  ages= 0:85,
                  observation.years = NULL,               # A vector of years to build the model on
                  projection.years = NULL,
+                 prevYear = NULL,
                  assumption = "population",
                  life.table = life.tables,
                  names = c("ageDiag"="Age_recode_with_single_ages_and_85",
                            "yrPrev"="yrPrev",
                            "yrDiag"="Year_of_diagnosis",
-                           "Observed"="Observed"))
+                           "Observed"="Observed"),
+                 keepExtraCols=FALSE)
 }
 }
 \seealso{

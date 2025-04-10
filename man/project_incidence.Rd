@@ -4,10 +4,17 @@
 \alias{project_incidence}
 \title{Project incidence for unobserved year(s)}
 \usage{
-project_incidence(data, projection.years = NULL, method = "poisson")
+project_incidence(
+  data,
+  data.years = NULL,
+  projection.years = NULL,
+  method = "poisson"
+)
 }
 \arguments{
 \item{data}{Incidence dataframe for which prevalence is to be projected}
+
+\item{data.years}{years covered by incidence years data.frame (if not specified will use all years in the data)}
 
 \item{projection.years}{Numeric vector of years to project prevalence for}
 
@@ -24,7 +31,9 @@ Project incidence for unobserved year(s)
 \examples{
 \dontrun{
 project_incidence(data=complete_incidence,
-                  final.year=2030)
+data.years=NULL,
+projection.years = NULL,
+method = "poisson")
 }
 }
 \seealso{
