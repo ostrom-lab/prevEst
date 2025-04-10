@@ -12,11 +12,11 @@ project_incidence(
 )
 }
 \arguments{
-\item{data}{Incidence dataframe for which prevalence is to be projected}
+\item{data}{Incidence dataframe for which incidence is to be projected}
 
 \item{data.years}{years covered by incidence years data.frame (if not specified will use all years in the data)}
 
-\item{projection.years}{Numeric vector of years to project prevalence for}
+\item{projection.years}{Numeric vector of years to project incidence for}
 
 \item{method}{GLM family to be base predictions off of}
 }

@@ -3,6 +3,7 @@
 export(format_incidence)
 export(format_lifetable)
 export(format_survival)
+export(prevEst)
 export(project_incidence)
 export(project_survival)
 export(regPrev)

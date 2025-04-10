@@ -223,7 +223,7 @@ It is important to note that in cases where sample size is low, more careful pre
 
 ## Generating Incomplete Prevalence Estimates
 
-Once the survival and incidence data are properly formatted, using them in the ``prevEst`` function is simple. It is designed so the user need only input the desired year to calculate prevalence estimates. Further options are provided to expand output including an option for age-adjusted prevalence,grouped ages, and sex-specific counts. You may also select the years to be used for calculation of prevalence, however if left blank, will include all the years from the incidence data. 
+Once the survival and incidence data are properly formatted, using them in the ``prevEst`` function is simple. It is designed so the user need only input the desired year to calculate prevalence estimates. Further options are provided to expand output including an option for age-adjusted prevalence and grouped age counts. You may also select the years to be used for calculation of prevalence, however if left blank, will include all the years from the incidence data. 
 
 In this example, using the previously cleaned data, incomplete prevalence is calculated for the year 2018. Here we are only using the incomplete incidence data to form an incomplete prevalence estimate for the shorter of the two incidence datasets, **incidence_reformat**. Here, we are also grouping ages into 5-year age groups, though this is not necessary.
 
@@ -288,7 +288,7 @@ As can be seen, in most cases, complete prevalence is much higher than incomplet
 
 ## Generating Age-Adjusted Prevalence Rates
 
-While age-adjusted rates can be obtained manually, this functionality is included in the ``prevEst`` function for users who specify ``adjust = T``, and requires no additional preparation assuming the data has been prepared as shown above. The data for age-specific (crude) rates was obtained from the US census and includes population estimates for each age group in 2018 by sex, and the standard population used is the U.S. 2000 Standard Population.Additionally, this function can take grouped ages. To use grouped ages, input a vector to group ages by (i.e. seq(0,85,5) for five-year age bins from 0 to 85, with 85+ grouped into 85). If no grouped ages are desired, the data can be returned in single ages up to 85. Finally, if your data is sex-specific (e.g. as in the case of ovarian cancer), sex-specific rates are also obtainable by specifying ``sex_specific == "Male"`` or ``sex_specific == "Female"``:
+While age-adjusted rates can be obtained manually, this functionality is included in the ``prevEst`` function for users who specify ``adjust = T``, and requires no additional preparation assuming the data has been prepared as shown above. The data for age-specific (crude) rates was obtained from the US census and includes population estimates for each age group in 2018 by sex, and the standard population used is the U.S. 2000 Standard Population.Additionally, this function can take grouped ages. To use grouped ages, input a vector to group ages by (i.e. seq(0,85,5) for five-year age bins from 0 to 85, with 85+ grouped into 85). If no grouped ages are desired, the data can be returned in single ages up to 85. 
 
 ```{r echo=TRUE,message=FALSE}
 complete_prevalence_rates <- prevEst(incidence=complete_incidence_reformat, 

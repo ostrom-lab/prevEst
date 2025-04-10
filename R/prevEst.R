@@ -43,9 +43,8 @@ prevEst <- function(
   years = NULL,
   adjust = F,                                              # Age-adjust results? If no, ignore subsequent arguments
   grouped_ages = F,                                        # If ages are grouped (i.e. 5-year age bands), then this should be TRUE
-  groups = NULL,                                           # Vector of grouped age levels containing the lowest age in each group,
+  groups = NULL                                           # Vector of grouped age levels containing the lowest age in each group,
                                                            # (e.g. if using 5-year age bands starting at age = 0, the vector would look like c(0, 5, 10, 15, etc.))
-
   )
 
 {
@@ -99,11 +98,11 @@ prevEst <- function(
     
       if (adjust == T) {
       
-        if(sex_specific != "Both sexes") {
-          census.population <- census.population %>%
-            dplyr::mutate(sex = tolower(sex)) %>%
-            dplyr::filter(sex == tolower(sex_specific))
-        }
+        # if(sex_specific != "Both sexes") {
+        #   census.population <- census.population %>%
+        #     dplyr::mutate(sex = tolower(sex)) %>%
+        #     dplyr::filter(sex == tolower(sex_specific))
+        # }
       
         if(grouped_ages == T){  
           

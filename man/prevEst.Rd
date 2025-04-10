@@ -11,8 +11,7 @@ prevEst(
   years = NULL,
   adjust = F,
   grouped_ages = F,
-  groups = NULL,
-  sex_specific = "Both sexes"
+  groups = NULL
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ prevEst(
 \item{grouped_ages}{Logical. If TRUE, multi-year age groups are used for adjustment.}
 
 \item{groups}{If grouped ages are used, vector of grouped age levels contain the lowest group in each age group is selected}
-
-\item{sex_specific}{character string containing sex ("Male" or "Female" if requesting sex-specific rates)}
 }
 \value{
 A dataframe with estimated prevalence by age at prevalence. If incidence data is grouped (as in the sample data),
@@ -60,5 +57,4 @@ prevEst(incidence = regPrev(incidence = incidence,
         year = 2018,
         years = 2010:2018)         
 }
-
 }

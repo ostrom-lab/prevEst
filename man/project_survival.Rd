@@ -13,7 +13,7 @@ project_survival(
   assumption = "nosurvival",
   life.table = NULL,
   names = c(ageDiag = "ageDiag", yrPrev = "yrPrev", yrDiag = "yrDiag", Observed =
-    "observed"),
+    "observed", expected = "Expected"),
   keepExtraCols = FALSE
 )
 }
