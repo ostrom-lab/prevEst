@@ -35,7 +35,7 @@
 #'         year = 2018,
 #'         years = 2010:2018)         
 #' }
-#'
+#' @export
 
 prevEst <- function(
   incidence,                                               # Incomplete incidence dataframe containing the variables: 1) age at diagnosis, 2) year diagnosed, 3) count
