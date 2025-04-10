@@ -38,13 +38,14 @@ project_survival <- function(data,                # Case listing survival data, 
                              names=c("ageDiag"="ageDiag",
                                      "yrPrev"="yrPrev",
                                      "yrDiag"="yrDiag",
-                                     "Observed"="observed"), # A list of names containing 1) age, 2) year, and 3) survival, of the form list("age" = ..., "year" = ..., etc.)
+                                     "Observed"="observed",
+                                     "expected"="Expected"), # A list of names containing 1) age, 2) year, and 3) survival, of the form list("age" = ..., "year" = ..., etc.)
                              keepExtraCols=FALSE
 ){
   options( dplyr.summarise.inform = FALSE)
   `%>%` <- dplyr::`%>%`
   
-  yrDiag <- ageDiag <- predicted_incidence <- yrPrev <- yrDiag <- ageDiag <- Expected <- period <- predicted_survival <- agePrev <- desc <- survival <- NULL
+  yrDiag <- ageDiag <- predicted_incidence <- yrPrev <- yrDiag <- ageDiag <- expected <- period <- predicted_survival <- agePrev <- desc <- survival <- NULL
   
   if(is.null(observation.years)) {
     stop("Please specify years for observations.")
@@ -77,8 +78,8 @@ project_survival <- function(data,                # Case listing survival data, 
  }
  if(all(is.na(new$survival)) & !is.null(life.table)){
    
-   if(any(!c("period", "agePrev", "Expected",'yrPrev') %in% names(life.table))){
-     stop("Life tables must contain 'period', 'agePrev', 'yrPrev', and 'Expected' columns \n")
+   if(any(!c("period", "agePrev", "expected",'yrPrev') %in% names(life.table))){
+     stop("Life tables must contain 'period', 'agePrev', 'yrPrev', and 'expected' columns \n")
    }
    
    
@@ -86,13 +87,13 @@ project_survival <- function(data,                # Case listing survival data, 
       dplyr::left_join(life.table, by = c("ageDiag"="agePrev", "period","yrPrev")) %>% 
       dplyr::filter(yrDiag <= length(observation.years) & 
              ageDiag %in% ages) %>%
-      tidyr::fill(Expected, .direction = "downup") %>%
+      tidyr::fill(expected, .direction = "downup") %>%
       dplyr::group_by(ageDiag, period) %>%
       dplyr::arrange(ageDiag, period) %>% 
-      dplyr::mutate(survival = cumprod(Expected)) %>%
+      dplyr::mutate(survival = cumprod(expected)) %>%
       dplyr::ungroup() %>%
       dplyr::mutate_all(as.numeric) %>%
-      dplyr::select(-Expected)
+      dplyr::select(-expected)
 }
   cat("Projecting ", length(projection.years), " years of survival for ",min(projection.years),"-",max(projection.years), "\n", sep = "")
   
@@ -142,13 +143,13 @@ project_survival <- function(data,                # Case listing survival data, 
       
       message("Applying population-level survival \n")
       
-      if(any(!c("period", "agePrev", "Expected",'yrPrev') %in% names(life.table))){
-        stop("Life tables must contain 'period', 'agePrev', 'yrPrev', and 'Expected' columns \n")
+      if(any(!c("period", "agePrev", "expected",'yrPrev') %in% names(life.table))){
+        stop("Life tables must contain 'period', 'agePrev', 'yrPrev', and 'expected' columns \n")
       }
       
       life.table <- life.table %>% 
         dplyr::mutate_all(as.numeric) %>%
-        dplyr::select(period, agePrev, Expected, yrPrev) %>%
+        dplyr::select(period, agePrev, expected, yrPrev) %>%
         dplyr::arrange(desc(period)) %>%
         dplyr::filter(period <= years.observed.surv & 
                         agePrev %in% ages)
@@ -157,10 +158,10 @@ project_survival <- function(data,                # Case listing survival data, 
         dplyr::left_join(new, by=names(skeleton)) %>%
         dplyr::mutate_all(as.numeric) %>%
         dplyr::left_join(life.table %>% dplyr::mutate_all(as.numeric), by = c("ageDiag"="agePrev", "period","yrPrev"))  %>%
-        dplyr::mutate(Expected = dplyr::case_when(agePrev>=100 ~ 0,
-                                           TRUE~Expected),
+        dplyr::mutate(expected = dplyr::case_when(agePrev>=100 ~ 0,
+                                           TRUE~expected),
                       survival = dplyr::case_when(!is.na(survival)~survival,
-                                           TRUE~Expected)) 
+                                           TRUE~expected)) 
       
       full.survival.temp2 <- full.survival.temp1  %>%
         dplyr::filter(period >= (years.observed.surv)) %>%
@@ -174,7 +175,7 @@ project_survival <- function(data,                # Case listing survival data, 
         dplyr::filter(period <= years.observed.surv) %>%
         dplyr::bind_rows(full.survival.temp2 %>% dplyr::filter(period > years.observed.surv)) %>%
         dplyr::arrange(ageDiag, period) %>%
-        dplyr::select(-Expected)
+        dplyr::select(-expected)
       
     }
   }
