@@ -6,8 +6,8 @@
 \usage{
 format_incidence(
   data,
-  ages,
-  years,
+  ages = NULL,
+  years = NULL,
   names = c(ageDiag = "age", yrDiag = "year", incidence = "count"),
   keepExtraCols = FALSE
 )
@@ -15,9 +15,9 @@ format_incidence(
 \arguments{
 \item{data}{Incidence dataframe}
 
-\item{ages}{Numeric vector}
+\item{ages}{Numeric vector. If not included, defaults to all ages in data.}
 
-\item{years}{Numeric vector}
+\item{years}{Numeric vector. If not specified, defaults to all years in data.}
 
 \item{names}{Named character vector}
 
@@ -38,7 +38,7 @@ and 3) the reported incidence for that combination of the two. While these funct
 
 data(incidence)
 format_incidence(data=incidence,
-                  ages = seq(0, 85, 5),
+                  ages = 0:85,
                   years = c(2010:2018),
                   names = c("ageDiag" = "ageDiag",
                           "yrDiag" = "yrDiag",

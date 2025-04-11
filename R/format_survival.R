@@ -70,6 +70,9 @@ format_survival <- function(data, # Survival data to be formatted
                             keepExtraCols=FALSE
 ) {
   
+  require(dplyr)
+  require(tidyr)
+  
   yrDiag <- yrPrev <- ageDiag <- period <- agePrev <- expected <- desc <- survival <- NULL
   
   options(dplyr.summarise.inform = FALSE)

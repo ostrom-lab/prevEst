@@ -13,8 +13,6 @@ fig_height: 6
 
 ```{r setup, include = FALSE, warning=F}
 
-require(tidyverse)
-
 knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE, 
@@ -31,12 +29,11 @@ list.files("../R", "*.R", full.names = T) %>%
 c(list.files("../data", full.names = T), "../R/sysdata.rda") %>%
   sapply(.,load,.GlobalEnv)
 
-plot.theme <- 
-  ggplot2::theme(axis.text =  ggplot2::element_text(colour="black"),
+plot.theme <- ggplot2::theme(axis.text = ggplot2::element_text(colour="black"),
         axis.title =  ggplot2::element_text(colour="black",face="bold"),
         panel.grid =  ggplot2::element_blank(),
         panel.background =  ggplot2::element_blank(),
-        strip.text =  ggplot2::element_text(colour="black",face="bold"),
+        strip.text = ggplot2::element_text(colour="black",face="bold"),
         strip.background =  ggplot2::element_blank())
 
 ```
@@ -60,16 +57,7 @@ For observed survival proportions use the survival session with the recommended 
 * *Parameters tab:* select "Pre-calculated Duration", "Survival months (from complete dates), the date of prevalence for study cutoff, "Cumulative Summary" and "Tables" under display, and select "observed" under cumulative summary;
 * *Table tab:* at a minimum include a year of diagnosis, age at diagnosis, and identifying histopatholgoies if any. You may also include other outcome interests such as sex, behavior, race ect. Additionally, like the incidence data, there should be one survival probability for each unique combination of year of diagnosis and age at diagnosis. 
 
-While we can't provide SEER data, dummy data resembling SEER data has been included in the package. The bottom 10 rows of the **incidence** dataset are shown.
-
-```{r read in data, eval=TRUE, echo=TRUE, message=FALSE}
-require(tidyverse)
-library(tidyverse)
-
-data(incidence)
-data(incidence_est)
-data(survival)
-```
+While we can't provide SEER data, dummy data resembling SEER data has been included in the package. 
 
 ## Importing Life Table Data
 
@@ -88,7 +76,7 @@ Next we will load in the dummy life table data and look at its structure.
 ```{r life table example, echo=TRUE, eval = T}
 data(life.table)
   
-tail(life.table, 10)
+head(life.table, 10)
 ```
 
 The probabilities shown are expected (i.e. average total-population mortality) relative survival rates, such for any combination of age at diagnosis and length of time, the survival probability corresponds to the probability that that person will live an additional year. For example, among all people who were 65 years old 10 years ago (i.e. 75 years old now), there is a `r round(life.table[which(life.table$ageDiag == 85 & life.table$period == 10),]$expected, 3)*100`% chance they will live an additional year.
@@ -102,10 +90,10 @@ First,  we will load in the two dummy incidence data and look at its structure.
 ```{r incidence example, echo=TRUE, eval = T}
 
 data(incidence)
-tail(incidence, 10)
+head(incidence, 10)
 
 data(incidence_est)
-tail(incidence_est, 10)
+head(incidence_est, 10)
 
 ```
 
@@ -113,13 +101,14 @@ For both of these data sources, we will use the ``format_incidence()`` function 
 
 ```{r reformat incidence files, echo=TRUE}
 
-incidence <- dplyr::mutate_all(incidence, as.numeric)
 incidence_reformat <- format_incidence(data = incidence,
                                        ages = 0:85,
                                        years = 2004:2018,
                                        names = c("ageDiag"="ageDiag",
                                                 "yrDiag"="yrDiag",
                                                 "incidence"="count"))
+
+head(incidence_reformat, 10)
 
 incidence_est_reformat <- format_incidence(data = incidence_est,
                                        ages = 0:85,
@@ -128,7 +117,7 @@ incidence_est_reformat <- format_incidence(data = incidence_est,
                                                 "yrDiag"="yrDiag",
                                                 "incidence"="count"))   
 
-tail(incidence_est_reformat, 10)
+head(incidence_est_reformat, 10)
 ```
 Here we can see 3 columns:
 
@@ -145,7 +134,7 @@ Now that we have both of our incidence sources formatted, it is time to combine 
 complete_incidence_reformat <- regPrev(incidence_reformat, 
                                        incidence_est_reformat, 
                                        regYr = 2004:2019, 
-                                       durationYr = 1975:2003)  
+                                       durationYr = 1980:2003)  
 
 head(complete_incidence_reformat, 10)
 ```
@@ -153,6 +142,21 @@ head(complete_incidence_reformat, 10)
 Aside from the incidence data sources as the first two arguments, you'll see there are two remaining optional arguments, ``regYr`` and ``durationYr``. These refer to the years you want to use to build the regression model and the years you want to estimate data for, respectively. If not specified, the default behavior of ``regYr`` is to use all years in common among the two data sources, and ``durationYr`` uses all other years. This may not be a realistic assumption to make in practice, so both ranges should be specified with care.
 
 1. *regYr* -- 
+
+Now we can combine the three incidence estimates to visualize.
+
+```{r echo=TRUE, fig.height= 4, fig.width=8}
+
+compare_incidence_estimates(incidence1=incidence_reformat,
+                            incidence2=incidence_est_reformat,
+                            complete_incidence=complete_incidence_reformat,
+                            names=c("incidence1"="incidence1",
+                                    "incidence2"="incidence2",
+                                    "complete_incidence"="Complete incidence")) 
+
+```
+
+
 
 ## Preparing Survival Data
 
@@ -164,10 +168,9 @@ Population survival assumes that survival continues to decline outside of the pe
 This first assumption is that for the years where a disparity exist, the missing years can be estimated using population life (actuarial) tables. When this is the case, provide the life tables as shown above to the corresponding argument.
 
 ``` {r format survival, echo=TRUE}
-survival <- survival %>%
-  filter(period + yrDiag == 2018)
 
 data(survival_unformatted)
+head(survival_unformatted)
 
 popsurvival_reformat <- format_survival(data=survival_unformatted,
                                         ages = 0:85,
@@ -180,7 +183,7 @@ popsurvival_reformat <- format_survival(data=survival_unformatted,
                                                   "yrDiag"="yrDiag",
                                                   "yrPrev"="yrPrev",
                                                   "Observed"="Observed"))   
-tail(popsurvival_reformat)
+head(popsurvival_reformat)
 ```
 
 Like the incidence data, the survival data has an *ageDiag* and *yrDiag* column. In addition, there is now a period column, which is the time length from the year they were diagnosed to the estimated incidence year. In this case, 1975 is 43 years before 2018. Similarly, the *agePrev* column is the ageDiag column plus the time from diagnosis. Finally *survival* refers to the cumulative survival probability at that age and year of prevalence. Here we can see that 85 year olds diagnosed in the year 1975 have a 0% chance of survival. 
@@ -191,6 +194,10 @@ No survival assumes that all survival estimates fall to zero after the observed 
 This assumption assumes that, for the years that there is a disparity, there was no survival. For example, if you only have 15 years of survival data, but the ``years = X`` argument suggests you want 20 in the output, years 16-20 will be provided as requested, but survival will be 0.
 
 ``` {r echo=TRUE}
+
+data(survival)
+head(survival)
+
 nosurvival_reformat <- format_survival(data=survival,
                                        ages = 0:85,
                                        years = 1975:2019,
@@ -199,7 +206,7 @@ nosurvival_reformat <- format_survival(data=survival,
                                        names = c("ageDiag"="ageDiag",
                                               "yrDiag"="yrDiag",
                                               "Observed"="survival"))   
-tail(nosurvival_reformat, 10)
+head(nosurvival_reformat, 10)
 ```
 While this data may look familiar, the key difference is that outside of the years for which there are data (e.g. 2000-2014), there is no survival.
 
@@ -216,7 +223,7 @@ fillsurvival_reformat <- format_survival(data=survival[survival$yrDiag >= 2000,]
                                        names = c("ageDiag"="ageDiag",
                                               "yrDiag"="yrDiag",
                                               "Observed"="survival"))   
-tail(fillsurvival_reformat, 10)
+head(fillsurvival_reformat, 10)
 ```
 
 It is important to note that in cases where sample size is low, more careful preparation of survival data may be warranted.
@@ -234,7 +241,7 @@ incomplete_prevalence <- prevEst(incidence=incidence_reformat,
                                  grouped_ages = T,
                                  groups = seq(0,100,5))
 
-tail(incomplete_prevalence, 10)
+head(incomplete_prevalence, 10)
 ```
 You'll notice that ages 100 and above show an estimated prevalence of 0; this is because survival estimates beyond this age are generally unrealiable, and so people in this group will be assumed to have 0% survival.
 
@@ -251,40 +258,24 @@ complete_prevalence <- prevEst(incidence=complete_incidence_reformat,
                                grouped_ages = T,
                                groups = seq(0,100,5))
 
-tail(complete_prevalence, 10)
+head(complete_prevalence, 10)
 ```
 
 ## Visualizing Prevalence Estimates
 
 Now we can combine the two prevalence estimates to visualize.
 
-```{r echo=TRUE, fig.height= 4, fig.width=8}
-combined_prevalence <- full_join(incomplete_prevalence, complete_prevalence, by = "agePrev") %>%
-  pivot_longer(cols = c(prevalence.x, prevalence.y), names_to = "type", values_to = "prevalence") %>%
-  mutate(type = recode(type, prevalence.x = "Incomplete Prevalence", prevalence.y = "Complete Prevalence")) 
+```{r echo=TRUE, fig.height= 4, fig.width=4}
 
-combined_prevalence %>%
-  group_by(type) %>%
-  summarise(prevalence = sum(prevalence, na.rm = T)) %>%
-  ungroup() %>%
-  ggplot(aes(x = type, y = prevalence,  fill = type, label = scales::comma(prevalence))) +
-  geom_col() + 
-  geom_text(position = position_stack(vjust = 0.5))  + 
-  scale_y_continuous(name = "Total Estimated Prevalence", labels = scales::comma, expand = c(0,0)) +
-  scale_x_discrete(name = "Prevalence Type", expand = c(0,0)) +
-  plot.theme +
-  theme(legend.position = "none")
-
-combined_prevalence %>%
-  ggplot(aes(x = agePrev, y = prevalence, fill = type)) +
-  geom_col() + 
-  scale_y_continuous(name = "Estimated Prevalence", labels = scales::comma, expand = c(0,0)) +
-  scale_x_continuous(name = "Age at Prevalence", limits = c(0,100), expand = c(0,0)) +
-  labs(fill = "Prevalence Type") +
-  plot.theme
+compare_prevalence_estimates(prevalence1=incomplete_prevalence,
+                   prevalence2=complete_prevalence,
+                  names=c("prevalence1"="Incomplete prevalence",
+                           "prevalence2"="Complete prevalence"),
+                           include_counts=TRUE)
 
 ```
-As can be seen, in most cases, complete prevalence is much higher than incomplete prevalence. It seems like complete prevalence is about 50% higher than incomplete prevalence. This is largely due to the fact that, despite covering a longer period of time, the incomplete incidence are an underestimate due to the underlying differences in geography attributed to each simulated dataset. 
+
+As can be seen, in most cases, complete prevalence is much higher than incomplete prevalence. It seems like complete prevalence is about 2-fold higher than incomplete prevalence. This is largely due to the fact that , despite covering a longer period of time, the incomplete incidence are an underestimate due to the underlying differences in geography attributed to each simulated dataset. 
 
 ## Generating Age-Adjusted Prevalence Rates
 

@@ -33,7 +33,6 @@ format_incidence <- function(data,                # A dataframe of counts for ea
                                        "incidence" = "count"), # A vector of names containing 1) age, 2) year, and 3) counts, of the form list("age" = ..., "year" = ..., etc.)
                              keepExtraCols=FALSE
 )  {
- 
    ageDiag <- yrDiag <-  inc.y <- inc.x <-  NULL
   
   `%>%` <- dplyr::`%>%`
@@ -43,7 +42,7 @@ format_incidence <- function(data,                # A dataframe of counts for ea
   new <- data.frame(ageDiag = data[[names[["ageDiag"]]]],
                     yrDiag = as.numeric(data[[names[["yrDiag"]]]]),
                     inc = as.numeric(data[[names[["incidence"]]]])) %>%
-    mutate_all(as.numeric)
+    dplyr::mutate_all(as.numeric)
   
   if( keepExtraCols==TRUE) {
     new <- new %>%
