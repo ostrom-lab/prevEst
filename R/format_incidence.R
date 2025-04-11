@@ -39,20 +39,22 @@ format_incidence <- function(data,                # A dataframe of counts for ea
   `%>%` <- dplyr::`%>%`
   
   options(dplyr.summarise.inform = FALSE)
+  
   new <- data.frame(ageDiag = data[[names[["ageDiag"]]]],
                     yrDiag = as.numeric(data[[names[["yrDiag"]]]]),
-                    inc = as.numeric(data[[names[["incidence"]]]])) 
+                    inc = as.numeric(data[[names[["incidence"]]]])) %>%
+    mutate_all(as.numeric)
   
   if( keepExtraCols==TRUE) {
     new <- new %>%
       dplyr::bind_cols(data %>% dplyr::select(-names))
   }
   
-  if ( is.null(ages)) {
+  if (is.null(ages)) {
     ages <- min(new$ageDiag):max(new$ageDiag)
   }
   if ( is.null(years)) {
-    ages <- min(new$yrDiag):max(new$yrDiag)
+    years <- min(new$yrDiag):max(new$yrDiag)
   }
   
   skeleton <- tidyr::expand_grid(ageDiag = ages,
