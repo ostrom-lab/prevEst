@@ -2,8 +2,8 @@
 #'
 #' @description This function formats incidence data for ease of use with functions included in this package. It takes new cases and summarizes them by age and year of diagnosis.
 #' @param data Incidence dataframe
-#' @param ages Numeric vector
-#' @param years Numeric vector
+#' @param ages Numeric vector. If not included, defaults to all ages in data.
+#' @param years Numeric vector. If not specified, defaults to all years in data.
 #' @param names Named character vector
 #' @param keepExtraCols Logical
 #' @details The prevEst function requires properly formatted incidence and survival data. This function, the counterpart to [format_survival()], is designed 
@@ -14,7 +14,7 @@
 #' 
 #' data(incidence)
 #' format_incidence(data=incidence,
-#'                   ages = seq(0, 85, 5),
+#'                   ages = 0:85,
 #'                   years = c(2010:2018),
 #'                   names = c("ageDiag" = "ageDiag",
 #'                           "yrDiag" = "yrDiag",
@@ -26,8 +26,8 @@
 #' @export
 
 format_incidence <- function(data,                # A dataframe of counts for each unique combination of age and year
-                             ages,                # A vector of ages to be included in the output
-                             years,               # A vector of years to be included in the output
+                             ages=NULL,                # A vector of ages to be included in the output
+                             years=NULL,               # A vector of years to be included in the output
                              names = c("ageDiag" = "age",
                                        "yrDiag" = "year",
                                        "incidence" = "count"), # A vector of names containing 1) age, 2) year, and 3) counts, of the form list("age" = ..., "year" = ..., etc.)
@@ -46,6 +46,13 @@ format_incidence <- function(data,                # A dataframe of counts for ea
   if( keepExtraCols==TRUE) {
     new <- new %>%
       dplyr::bind_cols(data %>% dplyr::select(-names))
+  }
+  
+  if ( is.null(ages)) {
+    ages <- min(new$ageDiag):max(new$ageDiag)
+  }
+  if ( is.null(years)) {
+    ages <- min(new$yrDiag):max(new$yrDiag)
   }
   
   skeleton <- tidyr::expand_grid(ageDiag = ages,
