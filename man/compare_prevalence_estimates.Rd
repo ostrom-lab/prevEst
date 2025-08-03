@@ -33,16 +33,3 @@ Generates a visual comparison of multiple prevalence estimates.
 \details{
 This function requires at least one prevalence estimate. It will generate a ggplot comparing up to 4 prevalence estimates.
 }
-\examples{
-
-compare_prevalence_estimates(prevalence1=prevalence1,
-                  prevalence2=prevalence2,
-                  prevalence3=prevalence3,
-                  prevalence4=prevalence4,
-                  names=c("prevalence1"="prevalence1",
-                          "prevalence2"="prevalence2",
-                          "prevalence3"="prevalence3",
-                          "prevalence4"="prevalence4"),
-                          include_counts=FALSE)
-
-}

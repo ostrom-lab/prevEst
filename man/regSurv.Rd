@@ -26,9 +26,10 @@ Estimate complete survival
 }
 \examples{
 
+\dontrun{
 data(survival)
 data(life.table)
 regSurv(surv = survival,
         life.table = life.table)
-
+}
 }

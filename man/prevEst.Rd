@@ -9,7 +9,6 @@ prevEst(
   survival,
   year,
   years = NULL,
-  adjust = F,
   grouped_ages = F,
   groups = NULL
 )
@@ -22,8 +21,6 @@ prevEst(
 \item{year}{Numeric. Year for which prevalence is to be estimated}
 
 \item{years}{Numeric. Years to use for calculating prevalence. Defaults to all years included in incidence dataframe.}
-
-\item{adjust}{Logical. If TRUE, rates will be age-adjusted}
 
 \item{grouped_ages}{Logical. If TRUE, multi-year age groups are used for adjustment.}
 
@@ -38,11 +35,11 @@ The function \code{prevEst} is used to estimate complete prevalence using surviv
 }
 \examples{
 
+\dontrun{
 data(incidence)
 data(incidence_est)
 data(survival)
 
-\dontrun{
 prevEst(incidence = regPrev(incidence = incidence,
                              incidence_est = incidence_est,
                             regYr = c(2001:2017)),

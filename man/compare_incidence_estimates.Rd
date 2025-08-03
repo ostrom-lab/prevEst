@@ -23,8 +23,6 @@ compare_incidence_estimates(
 \item{projected_incidence}{Incidence dataframe for projected incidence (optional).}
 
 \item{names}{Named character vector}
-
-\item{keepExtraCols}{Logical}
 }
 \description{
 Generates a visual comparison of multiple incidence estimates by year. Requires properly formated incidence estimates.
@@ -34,6 +32,7 @@ This function requires at least one incidence estimate. It will generate a ggplo
 }
 \examples{
 
+ \dontrun{
 data(incidence)
 incidence1 <- format_incidence(data=incidence,
                   ages = 0:85,
@@ -68,5 +67,5 @@ compare_incidence_estimates(incidence1=incidence1,
                           "incidence2"="incidence2",
                           "projected_incidence"="Projected incidence",
                           "complete_incidence"="Complete incidence")) 
-
+}
 }

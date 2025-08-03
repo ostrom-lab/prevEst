@@ -24,7 +24,6 @@ project_incidence <- function(data,
 
   yrDiag <- ageDiag <- predicted_incidence <- NULL
   
-  options(dplyr.summarise.inform = FALSE)
   `%>%` <- dplyr::`%>%`
 
   # Searches for columns containing age, year, incidence, then renames them to be used later.

@@ -75,3 +75,27 @@ NULL
 #'   ...
 #' }
 NULL
+#' Census data from 2018
+#'#' 
+#' @docType data
+#' @keywords datasets
+#' @name census.population
+#' @format A data frame with 86 rows and 2 columns:
+#' \describe{
+#'   \item{age}{Age in 2018}
+#'   \item{pop}{Total population}
+#'   ...
+#' }
+NULL
+#' 2000 US standard population in single ages from 0-90
+#' 
+#' @docType data
+#' @keywords datasets
+#' @name standard.population
+#' @format A data frame with 91 rows and 2 columns:
+#' \describe{
+#'   \item{Age}{Age}
+#'   \item{pop}{Population}
+#'   ...
+#' }
+NULL

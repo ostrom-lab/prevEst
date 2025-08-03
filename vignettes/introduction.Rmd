@@ -20,14 +20,10 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-  `%>%` <- dplyr::`%>%`
-  
+`%>%` <- dplyr::`%>%`
 
-list.files("../R", "*.R", full.names = T) %>%
-  sapply(source)
-
-c(list.files("../data", full.names = T), "../R/sysdata.rda") %>%
-  sapply(.,load,.GlobalEnv)
+# load all
+devtools::load_all()
 
 plot.theme <- ggplot2::theme(axis.text = ggplot2::element_text(colour="black"),
         axis.title =  ggplot2::element_text(colour="black",face="bold"),
@@ -169,6 +165,7 @@ This first assumption is that for the years where a disparity exist, the missing
 
 ``` {r format survival, echo=TRUE}
 
+data(life.table)
 data(survival_unformatted)
 head(survival_unformatted)
 
@@ -182,7 +179,8 @@ popsurvival_reformat <- format_survival(data=survival_unformatted,
                                         names = c("ageDiag"="ageDiag",
                                                   "yrDiag"="yrDiag",
                                                   "yrPrev"="yrPrev",
-                                                  "Observed"="Observed"))   
+                                                  "Observed"="Observed"),
+                                        keepExtraCols=FALSE)   
 head(popsurvival_reformat)
 ```
 
@@ -282,14 +280,18 @@ As can be seen, in most cases, complete prevalence is much higher than incomplet
 While age-adjusted rates can be obtained manually, this functionality is included in the ``prevEst`` function for users who specify ``adjust = T``, and requires no additional preparation assuming the data has been prepared as shown above. The data for age-specific (crude) rates was obtained from the US census and includes population estimates for each age group in 2018 by sex, and the standard population used is the U.S. 2000 Standard Population.Additionally, this function can take grouped ages. To use grouped ages, input a vector to group ages by (i.e. seq(0,85,5) for five-year age bins from 0 to 85, with 85+ grouped into 85). If no grouped ages are desired, the data can be returned in single ages up to 85. 
 
 ```{r echo=TRUE,message=FALSE}
-complete_prevalence_rates <- prevEst(incidence=complete_incidence_reformat, 
-                                 survival=popsurvival_reformat,
-                                 year = 2018,
-                                 adjust = T,
-                                 grouped_ages = T,
-                                 groups = seq(0,85,5))
 
-head(complete_prevalence_rates)
+data(census.population)
+data(standard.population)
+
+# complete_prevalence_rates <- adjust_prevEst(prevEst_ouput=complete_prevalence, 
+#                                             adjust = T,
+#                                             grouped_ages = T,
+#                                             groups = seq(0,85,5),
+#                                             census.population=census.population,
+#                                             standard.population=standard.population)
+# 
+# head(complete_prevalence_rates)
 ```
 
 

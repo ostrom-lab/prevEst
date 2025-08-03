@@ -6,10 +6,10 @@
 #' @param complete_incidence Incidence dataframe for complete incidence estimated using both datasets (optional).
 #' @param projected_incidence Incidence dataframe for projected incidence (optional).
 #' @param names Named character vector
-#' @param keepExtraCols Logical
 #' @details This function requires at least one incidence estimate. It will generate a ggplot comparing up to 4 incidence estimates from a main data set, comparison dataset, complete incidence, and project incidence files
 #' @examples
 #' 
+#'  \dontrun{
 #' data(incidence)
 #' incidence1 <- format_incidence(data=incidence,
 #'                   ages = 0:85,
@@ -44,7 +44,7 @@
 #'                           "incidence2"="incidence2",
 #'                           "projected_incidence"="Projected incidence",
 #'                           "complete_incidence"="Complete incidence")) 
-#'
+#'}
 #' @export
 
 

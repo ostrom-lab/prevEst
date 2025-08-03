@@ -9,13 +9,14 @@
 #' @return A formatted life table dataframe.
 #' @examples
 #' 
+#' \dontrun{
 #' format_lifetable(data,
 #'                   names = c("age" = "age",
 #'                           "year" = "yr",
 #'                           "interval" = "period",
 #'                           "expected"="Expected_Interval"))
 #'
-#'
+#' }
 #' @seealso [format_incidence()] The analogous function that formats incidence data
 #' @seealso [format_survival()] The analogous function that formats survival data
 #' @export

@@ -28,13 +28,14 @@ and 4) expected interval survival. While these functions are not mandatory, they
 }
 \examples{
 
+\dontrun{
 format_lifetable(data,
                   names = c("age" = "age",
                           "year" = "yr",
                           "interval" = "period",
                           "expected"="Expected_Interval"))
 
-
+}
 }
 \seealso{
 \code{\link[=format_incidence]{format_incidence()}} The analogous function that formats incidence data

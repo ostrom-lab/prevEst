@@ -8,19 +8,6 @@
 #' @param names Named character vector
 #' @param include_counts Logical. Will print text of prevalence counts above bars. 
 #' @details This function requires at least one prevalence estimate. It will generate a ggplot comparing up to 4 prevalence estimates.
-
-#' @examples
-#' 
-#'compare_prevalence_estimates(prevalence1=prevalence1,
-#'                   prevalence2=prevalence2,
-#'                   prevalence3=prevalence3,
-#'                   prevalence4=prevalence4,
-#'                   names=c("prevalence1"="prevalence1",
-#'                           "prevalence2"="prevalence2",
-#'                           "prevalence3"="prevalence3",
-#'                           "prevalence4"="prevalence4"),
-#'                           include_counts=FALSE)
-#'
 #' @export
 
 compare_prevalence_estimates <- function(prevalence1=NULL,
@@ -42,50 +29,66 @@ compare_prevalence_estimates <- function(prevalence1=NULL,
     stop("At least one prevalence estimate must be provided")
   } else {
     
-    prev1_est <- prevalence1 %>% dplyr::summarize(prevalence=sum(prevalence))
+    prev1_est <- prevalence1 %>% 
+      dplyr::summarize(prevalence=sum(prevalence))
     
     figure <- ggplot2::ggplot() +
-      ggplot2::geom_col(aes(x=names[["prevalence1"]],y=prev1_est$prevalence)) 
+      ggplot2::geom_col(aes(x=names[["prevalence1"]],
+                            y=prev1_est$prevalence)) 
     
     if(include_counts==TRUE) {
       figure <- figure +
-        ggplot2::geom_text(aes(x=names[["prevalence1"]],y=prev1_est$prevalence, label=prettyNum(prev1_est$prevalence, big.mark = ",")), size=3,vjust=-1)
+        ggplot2::geom_text(aes(x=names[["prevalence1"]],
+                               y=prev1_est$prevalence, 
+                               label=prettyNum(prev1_est$prevalence, big.mark = ",")), size=3,vjust=-1)
       
     }
     if(!is.null(prevalence2)){
       
-      prev2_est <- prevalence2 %>% dplyr::summarize(prevalence=sum(prevalence))
+      prev2_est <- prevalence2 %>% 
+        dplyr::summarize(prevalence=sum(prevalence))
       
       figure <- figure +
-        ggplot2::geom_col(aes(x=names[["prevalence2"]],y=prev2_est$prevalence))
+        ggplot2::geom_col(aes(x=names[["prevalence2"]],
+                              y=prev2_est$prevalence))
       
       if(include_counts==TRUE) {
         figure <- figure +
-          ggplot2::geom_text(aes(x=names[["prevalence2"]],y=prev2_est$prevalence, label=prettyNum(prev2_est$prevalence, big.mark = ",")), size=3,vjust=-1)
+          ggplot2::geom_text(aes(x=names[["prevalence2"]],
+                                 y=prev2_est$prevalence, 
+                                 label=prettyNum(prev2_est$prevalence, big.mark = ",")), size=3,vjust=-1)
       }
     }
     if(!is.null(prevalence3)){
       
-      prev3_est <- prevalence3 %>% dplyr::summarize(prevalence=sum(prevalence))
+      prev3_est <- prevalence3 %>%
+        dplyr::summarize(prevalence=sum(prevalence))
       
       figure <- figure +
-        ggplot2::geom_col(aes(x=names[["prevalence3"]],y=prev3_est$prevalence))
+        ggplot2::geom_col(aes(x=names[["prevalence3"]],
+                              y=prev3_est$prevalence))
       
       if(include_counts==TRUE) {
         figure <- figure +
-          ggplot2::geom_text(aes(x=names[["prevalence3"]],y=prev3_est$prevalence, label=prettyNum(prev3_est$prevalence, big.mark = ",")), size=3,vjust=-1)
+          ggplot2::geom_text(aes(x=names[["prevalence3"]],
+                                 y=prev3_est$prevalence, 
+                                 label=prettyNum(prev3_est$prevalence, big.mark = ",")), size=3,vjust=-1)
       }
     }
     if(!is.null(prevalence4)){
       
-      prev4_est <- prevalence4 %>% dplyr::summarize(prevalence=sum(prevalence))
+      prev4_est <- prevalence4 %>% 
+        dplyr::summarize(prevalence=sum(prevalence))
       
       figure <- figure +
-        ggplot2::geom_col(aes(x=names[["prevalence4"]],y=prev4_est$prevalence))
+        ggplot2::geom_col(aes(x=names[["prevalence4"]],
+                              y=prev4_est$prevalence))
       
       if(include_counts==TRUE) {
         figure <- figure +
-          ggplot2::geom_text(aes(x=names[["prevalence4"]],y=prev4_est$prevalence, label=prettyNum(prev4_est$prevalence, big.mark = ",")), size=3,vjust=-1)
+          ggplot2::geom_text(aes(x=names[["prevalence4"]],
+                                 y=prev4_est$prevalence,
+                                 label=prettyNum(prev4_est$prevalence, big.mark = ",")), size=3,vjust=-1)
       }
     }
     

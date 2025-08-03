@@ -17,7 +17,7 @@
 #' @return A formatted survival dataframe.
 #'
 #' @examples
-#' 
+#' \dontrun{
 #' data(survival)
 #' data(life.table)
 #' 
@@ -49,7 +49,7 @@
 #' 
 #'
 #'
-#'
+#' }
 #' @seealso [prevEst::format_incidence()] The analogous function that formats incidence data
 #' @export
 
@@ -121,6 +121,10 @@ format_survival <- function(data, # Survival data to be formatted
                   agePrev=ageDiag+period) %>%
     dplyr::arrange(ageDiag , yrDiag)
   
+  
+  temp.survival <- skeleton %>%
+    dplyr::left_join(new, by = names(skeleton))
+  
   if (assumption == "population") {
     if (is.null(life.table)) {
       stop("Life table must be provided for population survival \n")
@@ -135,51 +139,17 @@ format_survival <- function(data, # Survival data to be formatted
       life.table$yrPrev <- prevYear
     }
     
-    life.table <- life.table %>% 
-      dplyr::mutate_all(as.numeric) %>%
-      dplyr::select(period, agePrev, expected,yrPrev) %>%
-      dplyr::arrange(desc(period)) %>%
-      dplyr::filter(period <= length(years) & 
-                      agePrev %in% ages)
-    
-    full.survival.temp1 <- skeleton  %>%
-      dplyr::left_join(new, by=names(skeleton)) %>%
-      dplyr::mutate_all(as.numeric) %>%
-      dplyr::left_join(life.table %>% dplyr::mutate_all(as.numeric), by = c("agePrev", "period","yrPrev"))  %>%
-      dplyr::mutate(expected = dplyr::case_when(agePrev>=100 ~ 0,
-                                         TRUE~expected),
-                    survival = dplyr::case_when(!is.na(survival)~survival,
-                                         TRUE~expected)) 
-    
-    full.survival.temp2 <- full.survival.temp1  %>%
-      dplyr::filter(period >= (years.observed.surv)) %>%
-      dplyr::arrange(period) %>%
-      dplyr::group_by(ageDiag) %>%
-      dplyr::mutate(survival = cumprod(survival)) %>%
-      dplyr::ungroup() %>%
-      dplyr::arrange(ageDiag,yrDiag) 
-    
-    full.survival <- full.survival.temp1 %>%
-      dplyr::filter(period <= years.observed.surv) %>%
-      dplyr::bind_rows(full.survival.temp2 %>% dplyr::filter(period > years.observed.surv)) %>%
-      dplyr::arrange(ageDiag, period) %>%
-      dplyr::select(-expected)
+    full.survival <- population_survival(life.table=life.table, survival.data=temp.survival,years.observed.surv=years.observed.surv,ages=ages) 
 
   } else if (assumption=="nosurvival") {
     message("Applying no survival assumption \n")
-    full.survival <- skeleton  %>%
-      dplyr::left_join(new, by = names(skeleton)) %>%
-      dplyr::mutate(survival = dplyr::case_when(period > years.observed.surv ~ 0, TRUE ~ survival))
+    full.survival <- no_survival(survival.data=temp.survival,years.observed.surv=years.observed.surv)
     
   } else if (assumption=="fill") {
     
     message("Filling survival \n")
-    full.survival <- skeleton %>%
-      dplyr::left_join(new, by = names(skeleton)) %>%
-      dplyr::group_by(ageDiag) %>%
-      dplyr::arrange(ageDiag, period) %>%
-      tidyr::fill(survival, .direction = "downup") %>%
-      dplyr::ungroup()
+    
+    full.survival<- fill_survival(temp.survival)
   } 
   
   final <- full.survival %>%

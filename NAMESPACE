@@ -2,9 +2,12 @@
 
 export(compare_incidence_estimates)
 export(compare_prevalence_estimates)
+export(fill_survival)
 export(format_incidence)
 export(format_lifetable)
 export(format_survival)
+export(no_survival)
+export(population_survival)
 export(prevEst)
 export(project_incidence)
 export(project_survival)

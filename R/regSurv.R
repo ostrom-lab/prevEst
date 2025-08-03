@@ -6,11 +6,12 @@
 #' @return A survival dataframe with missing values imputed
 #' @examples
 #' 
+#' \dontrun{
 #' data(survival)
 #' data(life.table)
 #' regSurv(surv = survival,
 #'         life.table = life.table)
-#'
+#' }
 #' @export
 
 regSurv <- function(

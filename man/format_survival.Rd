@@ -51,7 +51,7 @@ to take SEER-like incidence data and format it for the \code{\link[=prevEst]{pre
 and 3) the observed survival for the combination of the two. While these functions are not mandatory, they help prepare the data for \code{\link[=prevEst]{prevEst()}} with simple transformation steps.
 }
 \examples{
-
+\dontrun{
 data(survival)
 data(life.table)
 
@@ -83,7 +83,7 @@ format_survival(data=survival,
 
 
 
-
+}
 }
 \seealso{
 \code{\link[=format_incidence]{format_incidence()}} The analogous function that formats incidence data

@@ -1,0 +1,76 @@
+#' Create crude and adjusted rates from prevEst output
+#'
+#' @description The function generates adjusted rates from prevalence output
+#'
+#' @param prevEst_ouput output from prevEst
+#' @param adjust Logical. If TRUE, rates will be age-adjusted
+#' @param grouped_ages Logical. If TRUE, multi-year age groups are used for adjustment.
+#' @param groups If grouped ages are used, vector of grouped age levels contain the lowest group in each age group is selected
+#' @param census.population description
+#' @param standard_population description
+#'
+#' @return A dataframe with prevalence rates by age at prevalence
+#'
+#' @export
+# 
+# adjust_prevEst <- function( prevEst_ouput=prevest, adjust=F, grouped_ages=F, groups=NULL,
+#                             census.population=census.population,standard.population=standard.population ) {
+#   if(is.null(census.population)) {
+#     stop("Please specify census population for rates")
+#   }
+#   
+#   if(grouped_ages == T){
+#     prevEst_ouput<- prevEst_ouput %>%
+#       dplyr::mutate(agePrev = as.character(cut(as.numeric(agePrev), c(groups, max(groups)*2), include.lowest = F, right = F, labels = groups))) %>%
+#       dplyr::group_by(agePrev) %>%
+#       dplyr::summarise(prevalence  = sum(prevalence)) %>%
+#       dplyr::ungroup()
+#     
+#     # modify census population to fit groupings used in adjusted rates
+#     census.population <- census.population %>%
+#       dplyr::mutate(age = as.character(cut(as.numeric(age), c(groups, max(groups)*2), include.lowest = F, 
+#                                            right = F, labels = groups))) %>%
+#       dplyr::group_by(age) %>%
+#       dplyr::summarise(census_population = sum(as.numeric(pop))) %>%
+#       dplyr::ungroup() %>%
+#       dplyr::arrange(as.numeric(age))
+#     
+#   } else {
+#     census.population <- census.population %>%
+#       dplyr::mutate(age = as.character(cut(as.numeric(age), c(groups, max(groups)*2), include.lowest = F, 
+#                                            right = F, labels = groups))) %>%
+#       dplyr::group_by(age) %>%
+#       dplyr::summarise(census_population = sum(as.numeric(pop))) %>%
+#       dplyr::ungroup() %>%
+#       dplyr::arrange(as.numeric(age))
+#   }
+#     
+#   if( adjust==T) {
+#     if(is.null(standard.population)) {
+#       stop("Please specify standard population for rates")
+#     }
+#     
+# 
+#     standard.population <- standard.population %>%
+#       dplyr::mutate(age = as.character(cut(as.numeric(age), c(groups, max(groups)*2), include.lowest = F, right = F, labels = groups))) %>%
+#       dplyr::group_by(age) %>%
+#       dplyr::summarise(standard_population = sum(as.numeric(standard_population))) %>%
+#       dplyr::ungroup() %>%
+#       dplyr::arrange(as.numeric(age))
+#     
+# adjusted_prevEst_ouput <- prevEst_ouput %>%
+#     dplyr::mutate(prevalence = ifelse(agePrev >= 85, sum(prevest$prevalence[which(prevest$agePrev >= 85)]), prevalence)) %>%
+#     dplyr::filter(agePrev <= 85) %>%
+#     dplyr::left_join(census.population, by = c("agePrev" = "age")) %>%
+#     dplyr::left_join(standard.population, by = c("agePrev" = "age")) %>%
+#     dplyr::group_by(agePrev) %>%
+#     dplyr::mutate(crude_rate = prevalence/census_population*100000,
+#                   weights = standard_population/sum(.$standard_population),
+#                   adjusted_rate = crude_rate*weights,
+#                   adjusted_lci = asht::wspoissonTest(prevalence, w = as.numeric(weights)/as.numeric(census_population),
+#                                                      wmtype = "tcz", mult=100000)$conf.int[[1]],
+#                   adjusted_uci = asht::wspoissonTest(prevalence, w = as.numeric(weights)/as.numeric(census_population),
+#                                                      wmtype = "tcz", mult=100000)$conf.int[[2]]) %>%
+#     dplyr::ungroup() %>%
+#     dplyr::arrange(as.numeric(agePrev))
+# }

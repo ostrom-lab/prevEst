@@ -25,10 +25,10 @@ Estimate complete incidence
 
 data(incidence)
 data(incidence_est)
-
+\dontrun{
 regPrev(incidence = incidence,
         incidence_est = incidence_est,
        regYr = c(2001:2017),
        durationYr = c(1975:2000))
-
+}
 }
