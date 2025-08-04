@@ -39,7 +39,9 @@ Imports:
     pscl,
     ggplot2,
     scales,
-    tidyselect
+    tidyselect,
+    statmod,
+    devtools
 Suggests:
     utils,
     knitr,

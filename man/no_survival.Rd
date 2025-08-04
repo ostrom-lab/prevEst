@@ -4,7 +4,11 @@
 \alias{no_survival}
 \title{Apply assumption of death after observation period}
 \usage{
-no_survival(survival.data = survival.data, years.observed.surv = NULL)
+no_survival(
+  survival.data = survival.data,
+  prevYear = NULL,
+  years.observed.surv = NULL
+)
 }
 \description{
 This function works within a survival formatting function to apply an assumption of death after observation period

@@ -19,7 +19,7 @@
 format_survival <- function(data, # Survival data to be formatted
                             SurvType = "Observed",
                             ages=NULL,                # A vector of ages to be included in the output
-                            years=NULL,               # A vector of years to be included in the output
+                            covered_years=NULL,               # A vector of years to be included in the output
                             prevYear=NULL,
                             names=c("ageDiag"="ageDiag",
                                     "yrDiag"="yrDiag",
@@ -38,36 +38,37 @@ format_survival <- function(data, # Survival data to be formatted
     names <- c(names,"yrPrev"="yrPrev")
   }
   
-  surv_max <- as.numeric(data[[names[[SurvType]]]]) %>% max(.)
-  
-  new <- data.frame(ageDiag  = as.numeric(gsub("\\D", "", data[[names[["ageDiag"]]]])),
-                    yrDiag = as.numeric(gsub("\\D", "", data[[names[["yrDiag"]]]])),
-                    yrPrev = as.numeric(gsub("\\D", "", data[[names[["yrPrev"]]]])),
-                    survival = as.numeric(data[[names[[SurvType]]]])) %>%
-    dplyr::distinct(.keep_all=TRUE) 
+  new <- data %>%
+    dplyr::rename( c("ageDiag"=names[["ageDiag"]],
+                     "yrDiag"=names[["yrDiag"]], 
+                               "yrPrev" =names[["yrPrev"]],
+                               "survival"=names[[SurvType]])) %>%
+    dplyr::select(ageDiag,yrDiag,yrPrev,survival) %>%
+    dplyr::mutate_all(as.numeric) %>%
+                     dplyr::mutate(survival = dplyr::case_when(max(survival, na.rm=TRUE) >1 ~ survival/100,
+                                                               TRUE ~ survival))  %>%
+    dplyr::distinct(.keep_all=TRUE)  
   
   if (is.null(ages)) {
     ages <- min(new$ageDiag):max(new$ageDiag)
   }
-  if ( is.null(years)) {
-    years <- min(new$yrDiag):max(new$yrDiag)
+  if ( is.null(covered_years)) {
+    covered_years <- min(new$yrDiag):max(new$yrDiag)
   }
   
   if(is.null(prevYear)) {
-    prevYear = max(years)
+    prevYear = covered_years
   } 
   
   new <- new %>%
-    dplyr::filter(yrDiag %in% years) %>%
+    dplyr::filter(yrDiag %in% covered_years) %>%
     dplyr::filter(ageDiag %in% ages) %>%
-    dplyr::filter(yrPrev == prevYear) %>%
-    dplyr::mutate(survival = dplyr::case_when(surv_max>1 ~ survival/100,
-                                              TRUE ~ survival)) %>%
+    dplyr::filter(yrPrev %in% prevYear)  %>%
     dplyr::arrange(yrDiag, ageDiag)
   
   
   skeleton <- tidyr::expand_grid(ageDiag = ages,
-                                 yrDiag =  as.numeric(years)) %>%
+                                 yrDiag =  as.numeric(covered_years)) %>%
     dplyr::arrange(ageDiag, yrDiag)
   
   final <-  dplyr::left_join(skeleton, new, by = c("ageDiag", "yrDiag")) %>%

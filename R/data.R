@@ -91,10 +91,34 @@ NULL
 #' 
 #' @docType data
 #' @keywords datasets
-#' @name standard.population
+#' @name US_2000_standard_population
 #' @format A data frame with 91 rows and 2 columns:
 #' \describe{
-#'   \item{Age}{Age}
+#'   \item{age}{Age}
+#'   \item{pop}{Population}
+#'   ...
+#' }
+NULL
+#' 2011 Canadian standard population in single ages from 0-90
+#' 
+#' @docType data
+#' @keywords datasets
+#' @name Canada_2011_standard_population
+#' @format A data frame with 91 rows and 2 columns:
+#' \describe{
+#'   \item{age}{Age}
+#'   \item{pop}{Population}
+#'   ...
+#' }
+NULL
+#' World (WHO 2000-2025) Std Million from 0-90
+#' 
+#' @docType data
+#' @keywords datasets
+#' @name World_standard_population
+#' @format A data frame with 91 rows and 2 columns:
+#' \describe{
+#'   \item{age}{Age}
 #'   \item{pop}{Population}
 #'   ...
 #' }

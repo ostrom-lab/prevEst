@@ -6,9 +6,10 @@
 \usage{
 project_survival(
   data,
-  ages,
+  ages = NULL,
   observation.years = NULL,
   projection.years = NULL,
+  years.observed.surv = NULL,
   prevYear = NULL,
   assumption = "nosurvival",
   life.table = NULL

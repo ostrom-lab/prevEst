@@ -7,6 +7,7 @@
 population_survival(
   life.table = life.table,
   survival.data = survival.data,
+  prevYear = NULL,
   years.observed.surv = NULL
 )
 }

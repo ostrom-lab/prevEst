@@ -18,9 +18,17 @@ fill_survival <- function(survival.data=survival.data)  {
 #' @description This function works within a survival formatting function to apply an assumption of death after observation period
 #' @export
 
-no_survival <- function(survival.data=survival.data,years.observed.surv=NULL) {
+no_survival <- function(survival.data=survival.data,
+                        prevYear = NULL,
+                        years.observed.surv=NULL) {
   `%>%` <- dplyr::`%>%`
   . <- period <- survival <-  yrPrev <- ageDiag <- yrPrev <- NULL
+  
+  
+  if(is.null(prevYear)) {
+    prevYear= max(survival.data$yrDiag)
+  }
+  
   
   if(is.null(years.observed.surv)) {
     years.observed.surv <-  max(survival.data$yrDiag) - min(survival.data$yrDiag)
@@ -41,11 +49,16 @@ no_survival <- function(survival.data=survival.data,years.observed.surv=NULL) {
 
 population_survival <- function(life.table=life.table, 
                                 survival.data=survival.data,
+                                prevYear = NULL,
                                 years.observed.surv=NULL) {
   
   yrPrev <- agePrev <- expected <- period <- survival <- ageDiag <-  desc <- yrDiag <-  NULL
   
   `%>%` <- dplyr::`%>%`
+  
+  if(is.null(prevYear)) {
+    prevYear= max(survival.data$yrDiag)
+  }
   
   if(is.null(years.observed.surv)) {
     years.observed.surv <- max(survival.data$yrDiag) - min(survival.data$yrDiag)
@@ -119,9 +132,10 @@ population_survival <- function(life.table=life.table,
 #' @export
 
 project_survival <- function(data,                # Case listing survival data, having either 0/1 or Dead/Alive as indicators
-                             ages,
+                             ages = NULL,
                              observation.years = NULL,               # A vector of years to build the model on
                              projection.years = NULL,
+                             years.observed.surv=NULL,
                              prevYear = NULL,
                              assumption="nosurvival",
                              life.table=NULL
@@ -149,40 +163,51 @@ project_survival <- function(data,                # Case listing survival data, 
     }
   }
   
+  if(is.null(ages)){
+    ages <- min(survival.data$ageDiag):max(survival.data$ageDiag)
+  }
+  
   if(is.null(prevYear)) {
     prevYear=max(c(observation.years,projection.years))
   }
   
   first.year <- min(c(data$yrDiag,min(projection.years)))
   final.year <- as.numeric(max(projection.years))
+  
+  if(is.null(years.observed.surv)) {
   years.observed.surv = length(observation.years)
+  }
   
   for_projection <- data %>% 
+    dplyr::mutate(period=yrPrev-yrDiag)%>%
     dplyr::left_join(life.table, by = c("ageDiag"="agePrev", "period","yrPrev")) %>% 
-    dplyr::filter(yrDiag %in% observation.years &    ageDiag %in% ages) %>%
-    tidyr::fill(expected, .direction = "downup") %>%
+    dplyr::filter(ageDiag %in% ages) %>%
     dplyr::group_by(ageDiag, period) %>%
     dplyr::arrange(ageDiag, period) %>% 
     dplyr::ungroup() %>%
     dplyr::mutate_all(as.numeric) %>%
     dplyr::select(-expected)
   
-  
   cat("Projecting ", length(projection.years), " years of survival for ",min(projection.years),"-",max(projection.years), "\n", sep = "")
   
   proj.surv  <- for_projection  %>%
-    tidyr::drop_na() %>%
-    dplyr::group_by(period) %>%
-    tidyr::nest() %>%
+   # tidyr::drop_na() %>%
+    dplyr::filter(yrDiag %in% observation.years) %>%
+    dplyr::mutate(surv = dplyr::case_when(survival >= 1 ~ 0.999,
+                                          survival <= 0 ~ 0.001,
+                                          T ~ survival)) %>%
+    dplyr::filter(period != 0 & period <= years.observed.surv) %>%
+    tidyr::nest(.by=period) %>%
     dplyr::mutate(predicted_survival=purrr::map(data, ~modelr::add_predictions(data=expand.grid(yrDiag = projection.years,
                                                                                                 ageDiag = ages),
                                                                                betareg::betareg(survival ~ as.numeric(yrDiag) + as.numeric(ageDiag), data = .x),
                                                                                var="survival"))) %>%
     dplyr::select(-data) %>%
-    tidyr::unnest(cols=predicted_survival) 
+    tidyr::unnest(cols=predicted_survival) %>%
+    dplyr::mutate(yrPrev=yrDiag+period)
+    
   
-  survival.merged <- dplyr::bind_rows(data, proj.surv) %>%
-    dplyr::filter(yrDiag >= first.year) %>% 
+  survival.merged <- dplyr::bind_rows(for_projection, proj.surv) %>%
     dplyr::mutate_all(as.numeric) %>%
     dplyr::arrange(ageDiag, yrDiag, period)
   
@@ -196,7 +221,7 @@ project_survival <- function(data,                # Case listing survival data, 
     dplyr::arrange(ageDiag , yrDiag)  %>%
     dplyr::mutate_all(as.numeric) %>%
     dplyr::filter(period >= 0)  %>%
-    dplyr::left_join(survival.merged, by = names(skeleton)) %>%
+    dplyr::left_join(survival.merged, by = c( "ageDiag", "yrDiag", "yrPrev", "period")) %>%
     dplyr::mutate(survival=dplyr::case_when(yrDiag==yrPrev ~ 1,
                                             survival>1~survival/100,
                                             survival<=0~0,
