@@ -1,5 +1,7 @@
 #' Project incidence for unobserved year(s)
-#'
+#' @description
+#' Project incidence data  for unobserved future or past year(s). Requires properly formated data.
+#' 
 #' @param data Incidence dataframe for which incidence is to be projected
 #' @param data.years years covered by incidence years data.frame (if not specified will use all years in the data)
 #' @param projection.years Numeric vector of years to project incidence for
@@ -73,4 +75,6 @@ project_incidence <- function(data,
     dplyr::filter(yrDiag %in% projection.years & !(yrDiag %in% incidence$yrDiag))
 
   incidence.merged <-  dplyr::bind_rows(incidence,proj.inc)
+  
+  return(incidence.merged)
 }
