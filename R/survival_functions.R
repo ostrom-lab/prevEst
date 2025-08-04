@@ -155,16 +155,10 @@ project_survival <- function(data,                # Case listing survival data, 
   if(all(is.na(data$survival))){
     stop("No survival data provided")
   }
-  if(is.null(life.table)) {
-    stop("No life table provided")
-  } else {
-    if(any(!c("period", "agePrev", "expected",'yrPrev') %in% names(life.table))){
-      stop("Life tables must contain 'period', 'agePrev', 'yrPrev', and 'expected' columns \n")
-    }
-  }
+
   
   if(is.null(ages)){
-    ages <- min(survival.data$ageDiag):max(survival.data$ageDiag)
+    ages <- min(data$ageDiag):max(data$ageDiag)
   }
   
   if(is.null(prevYear)) {
@@ -193,14 +187,17 @@ project_survival <- function(data,                # Case listing survival data, 
   proj.surv  <- for_projection  %>%
    # tidyr::drop_na() %>%
     dplyr::filter(yrDiag %in% observation.years) %>%
-    dplyr::mutate(surv = dplyr::case_when(survival >= 1 ~ 0.999,
-                                          survival <= 0 ~ 0.001,
-                                          T ~ survival)) %>%
-    dplyr::filter(period != 0 & period <= years.observed.surv) %>%
+    
+    # remove ones and zeros and add noise to estimates
+    dplyr::rowwise() %>%
+    dplyr::mutate(surv = dplyr::case_when(survival >= .99 ~ sample(seq(0.99,.999,.0001),size=1),
+                                          survival <= 0.01 ~ sample(seq(0.0001,0.001,.0001),size=1),
+                                          T ~ survival) ) %>%
+    dplyr::filter(period != 0) %>%
     tidyr::nest(.by=ageDiag) %>%
     dplyr::mutate(predicted_survival=purrr::map(data, ~modelr::add_predictions(data=expand.grid(yrDiag = projection.years,
                                                                                                   period = 1: length(observation.years)),
-                                                                               betareg::betareg(survival ~ as.numeric(yrDiag) + as.numeric(period), data = .x),
+                                                                               betareg::betareg(surv ~ jitter(as.numeric(yrDiag)) + as.numeric(period), data = .x),
                                                                                var="survival"))) %>%
     dplyr::select(-data) %>%
     tidyr::unnest(cols=predicted_survival) %>%
@@ -230,6 +227,25 @@ project_survival <- function(data,                # Case listing survival data, 
     dplyr::arrange(ageDiag, period, yrPrev) %>%
     dplyr::filter(period >= 0 & yrPrev==prevYear) %>%
     dplyr::select(ageDiag,agePrev, yrDiag, yrPrev, period , survival) 
+  
+  if (assumption=="population") {
+    if(is.null(life.table)) {
+      stop("No life table provided")
+    } else {
+      if(any(!c("period", "agePrev", "expected",'yrPrev') %in% names(life.table))){
+        stop("Life tables must contain 'period', 'agePrev', 'yrPrev', and 'expected' columns \n")
+      }
+    
+    final <- population_survival(life.table=life.table, 
+                                    survival.data=final,
+                                    prevYear = prevYear,
+                                    years.observed.surv=years.observed.surv)
+    }
+  }
+  if (assumption=="nosurvival") {
+    final <- no_survival(prevYear = prevYear,
+                                 years.observed.surv=years.observed.surv)
+  }
   
   return(as.data.frame(final))
 }

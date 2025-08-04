@@ -60,9 +60,11 @@ prevEst <- function(
     stop("Survival dataframe is NULL")
   } else if (is.null(year)){
     stop("Prevalence year not specified")
-  } else if (is.null(years)){
-    years <- unique(incidence$yrDiag)
-  } 
+  } else {
+    
+     if (is.null(years)){
+      years <- unique(incidence$yrDiag)
+     }
   
 
     inc <- incidence %>%
@@ -80,7 +82,6 @@ prevEst <- function(
              agePrev = (year-yrDiag) + ageDiag,
              survival = ifelse(agePrev >=100, 0, survival)) %>%
       dplyr::filter(yrDiag %in% years) %>%
-      dplyr::filter(agePrev <= max(inc$agePrev)) %>%
       tidyr::drop_na() 
     
     prevest <- inc %>%
@@ -104,5 +105,7 @@ prevEst <- function(
       dplyr::filter(agePrev >= 0) %>% 
       dplyr::arrange(agePrev)
     
+    
   return(prevest)  
+    }
 }

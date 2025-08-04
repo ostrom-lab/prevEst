@@ -12,3 +12,4 @@
 *.Rproj
 inst/doc
 docs
+.Rproj.user
