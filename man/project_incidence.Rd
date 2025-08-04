@@ -26,7 +26,7 @@ Predicted survival proportions for \code{years}
 Projected incidence dataframe including projection years
 }
 \description{
-Project incidence for unobserved year(s)
+Project incidence data  for unobserved future or past year(s). Requires properly formated data.
 }
 \examples{
 \dontrun{

@@ -169,19 +169,13 @@ data(life.table)
 data(survival_unformatted)
 head(survival_unformatted)
 
-popsurvival_reformat <- format_survival(data=survival_unformatted,
-                                        ages = 0:85,
-                                        years = 1975:2019,
-                                        prevYear = 2019,
-                                        assumption = "population",
+formatted_survival <- format_survival(data=survival_unformatted,
                                         SurvType = "Observed",
-                                        life.table = life.table,
                                         names = c("ageDiag"="ageDiag",
                                                   "yrDiag"="yrDiag",
                                                   "yrPrev"="yrPrev",
-                                                  "Observed"="Observed"),
-                                        keepExtraCols=FALSE)   
-head(popsurvival_reformat)
+                                                  "Observed"="Observed"))   
+head(formatted_survival)
 ```
 
 Like the incidence data, the survival data has an *ageDiag* and *yrDiag* column. In addition, there is now a period column, which is the time length from the year they were diagnosed to the estimated incidence year. In this case, 1975 is 43 years before 2018. Similarly, the *agePrev* column is the ageDiag column plus the time from diagnosis. Finally *survival* refers to the cumulative survival probability at that age and year of prevalence. Here we can see that 85 year olds diagnosed in the year 1975 have a 0% chance of survival. 
@@ -193,35 +187,30 @@ This assumption assumes that, for the years that there is a disparity, there was
 
 ``` {r echo=TRUE}
 
-data(survival)
-head(survival)
+survival_population <- population_survival(life.table=life.table,
+                                           survival.data=formatted_survival,
+                                           years.observed.surv=20)
+  head(survival_population, 10)
 
-nosurvival_reformat <- format_survival(data=survival,
-                                       ages = 0:85,
-                                       years = 1975:2019,
-                                       prevYear = 2019,
-                                       assumption = "nosurvival",
-                                       names = c("ageDiag"="ageDiag",
-                                              "yrDiag"="yrDiag",
-                                              "Observed"="survival"))   
-head(nosurvival_reformat, 10)
+survival_nosurvival <- no_survival(survival.data=formatted_survival,
+                                   years.observed.surv=20)   
+
+head(survival_nosurvival, 10)
+
+
+
 ```
 While this data may look familiar, the key difference is that outside of the years for which there are data (e.g. 2000-2014), there is no survival.
 
 ### 3. Filled Survival
 
-Finally, in cases where you may want to fill existing survival data into the years for which there are a disparity,  you may use this option. This assumption may be sound for cases of larger disparities, and so should be used with caution. The 
+Finally, in cases where you may want to fill existing survival data into the years for which there are a disparity,  you may use this option. This assumption may be sound for cases of larger disparities, and so should be used with caution.  
 
 ``` {r echo=TRUE}
-fillsurvival_reformat <- format_survival(data=survival[survival$yrDiag >= 2000,],
-                                       ages = 0:85,
-                                       years = 1975:2019,
-                                       prevYear = 2019,
-                                       assumption = "fill",
-                                       names = c("ageDiag"="ageDiag",
-                                              "yrDiag"="yrDiag",
-                                              "Observed"="survival"))   
-head(fillsurvival_reformat, 10)
+
+survival_fill <- fill_survival(survival.data=formatted_survival)   
+
+head(survival_fill, 10)
 ```
 
 It is important to note that in cases where sample size is low, more careful preparation of survival data may be warranted.
@@ -233,8 +222,9 @@ Once the survival and incidence data are properly formatted, using them in the `
 In this example, using the previously cleaned data, incomplete prevalence is calculated for the year 2018. Here we are only using the incomplete incidence data to form an incomplete prevalence estimate for the shorter of the two incidence datasets, **incidence_reformat**. Here, we are also grouping ages into 5-year age groups, though this is not necessary.
 
 ```{r echo=TRUE}
+
 incomplete_prevalence <- prevEst(incidence=incidence_reformat, 
-                                 survival=popsurvival_reformat,
+                                 survival=survival_population,
                                  year = 2019,
                                  grouped_ages = T,
                                  groups = seq(0,100,5))
@@ -251,7 +241,7 @@ Using the ``prevEst`` function as done previously, the complete incidence data (
 
 ```{r echo=TRUE}
 complete_prevalence <- prevEst(incidence=complete_incidence_reformat, 
-                               survival=popsurvival_reformat,
+                               survival=survival_population,
                                year = 2019,
                                grouped_ages = T,
                                groups = seq(0,100,5))

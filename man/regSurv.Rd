@@ -6,6 +6,7 @@
 \usage{
 regSurv(
   surv,
+  years = NULL,
   names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", period = "period", observed =
     "survival"),
   life.table
@@ -14,7 +15,9 @@ regSurv(
 \arguments{
 \item{surv}{Incomplete survival dataframe containing age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), and survival of new cases (named "observed)}
 
-\item{names}{Years to do regression on i.e. c(2000:2010)}
+\item{years}{Years to do regression on i.e. c(2000:2010)}
+
+\item{names}{names of variables in survival dataframe}
 
 \item{life.table}{Dataframe of life tables with relative survival with respect to age and period}
 }
@@ -30,6 +33,11 @@ Estimate complete survival
 data(survival)
 data(life.table)
 regSurv(surv = survival,
-        life.table = life.table)
+   years=2019:2022,
+   names = c("ageDiag" = "ageDiag", 
+          "yrDiag" = "yrDiag",
+          "period" = "period",
+          "observed" = "survival"),
+         life.table = life.table)
 }
 }
