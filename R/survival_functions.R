@@ -197,10 +197,10 @@ project_survival <- function(data,                # Case listing survival data, 
                                           survival <= 0 ~ 0.001,
                                           T ~ survival)) %>%
     dplyr::filter(period != 0 & period <= years.observed.surv) %>%
-    tidyr::nest(.by=period) %>%
+    tidyr::nest(.by=ageDiag) %>%
     dplyr::mutate(predicted_survival=purrr::map(data, ~modelr::add_predictions(data=expand.grid(yrDiag = projection.years,
-                                                                                                ageDiag = ages),
-                                                                               betareg::betareg(survival ~ as.numeric(yrDiag) + as.numeric(ageDiag), data = .x),
+                                                                                                  period = 1: length(observation.years)),
+                                                                               betareg::betareg(survival ~ as.numeric(yrDiag) + as.numeric(period), data = .x),
                                                                                var="survival"))) %>%
     dplyr::select(-data) %>%
     tidyr::unnest(cols=predicted_survival) %>%
@@ -209,15 +209,15 @@ project_survival <- function(data,                # Case listing survival data, 
   
   survival.merged <- dplyr::bind_rows(for_projection, proj.surv) %>%
     dplyr::mutate_all(as.numeric) %>%
-    dplyr::arrange(ageDiag, yrDiag, period)
+    dplyr::arrange(ageDiag, yrDiag, period) %>%
+    dplyr::mutate(agePrev=ageDiag+period)
   
   # Create skeleton dataframe and left join to "new" dataframe to handle missing values. Will default to survival = 1 if data mising.
   final <- tidyr::expand_grid(ageDiag  = ages,
                               yrDiag = first.year:final.year,
                               yrPrev = first.year:final.year) %>%
     dplyr::distinct(.keep_all=TRUE) %>%
-    dplyr::mutate(period=yrPrev-yrDiag,
-                  agePrev=ageDiag+period) %>%
+    dplyr::mutate(period=yrPrev-yrDiag) %>%
     dplyr::arrange(ageDiag , yrDiag)  %>%
     dplyr::mutate_all(as.numeric) %>%
     dplyr::filter(period >= 0)  %>%
@@ -228,8 +228,8 @@ project_survival <- function(data,                # Case listing survival data, 
                                             agePrev>=100~0,
                                             TRUE~as.numeric(survival)))  %>%
     dplyr::arrange(ageDiag, period, yrPrev) %>%
-    dplyr::select(ageDiag,agePrev, yrDiag, yrPrev, period , survival) %>%
-    dplyr::filter(period >= 0 & yrPrev==prevYear)
+    dplyr::filter(period >= 0 & yrPrev==prevYear) %>%
+    dplyr::select(ageDiag,agePrev, yrDiag, yrPrev, period , survival) 
   
   return(as.data.frame(final))
 }
