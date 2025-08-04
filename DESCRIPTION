@@ -36,13 +36,14 @@ Imports:
     modelr,
     betareg,
     asht,
-    pscl
+    pscl,
+    ggplot2,
+    scales,
+    tidyselect
 Suggests:
     utils,
-    SEER2R,
     knitr,
-    rmarkdown,
-    testthat (>= 3.0.0)
+    rmarkdown
 VignetteBuilder: utils, knitr
 Encoding: UTF-8
 LazyData: true
