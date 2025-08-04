@@ -65,20 +65,25 @@ prevEst <- function(
   } 
   
 
-    inc <- incidence %>% dplyr::mutate_all(as.numeric)  %>%
+    inc <- incidence %>%
+      dplyr::mutate_all(as.numeric)  %>%
+      dplyr::filter(yrDiag %in% years) %>%
       dplyr::distinct(.keep_all=TRUE) %>%
       dplyr::mutate(yrPrev = year,
-           agePrev = (year-yrDiag) + ageDiag)
+           agePrev = (year-yrDiag) + ageDiag) %>%
+      tidyr::drop_na() 
       
-    surv <- survival %>% dplyr::mutate_all(as.numeric) %>%
+    surv <- survival %>% 
+      dplyr::mutate_all(as.numeric) %>%
       dplyr::distinct(.keep_all=TRUE) %>%
       dplyr::mutate(yrPrev = year,
              agePrev = (year-yrDiag) + ageDiag,
-             survival = ifelse(agePrev >=100, 0, survival))
-    
+             survival = ifelse(agePrev >=100, 0, survival)) %>%
+      dplyr::filter(yrDiag %in% years) %>%
+      dplyr::filter(agePrev <= max(inc$agePrev)) %>%
+      tidyr::drop_na() 
     
     prevest <- inc %>%
-      dplyr::filter(yrDiag %in% years) %>%
       dplyr::left_join(surv, by = c("ageDiag", "yrDiag", "agePrev","yrPrev")) %>%
       dplyr::mutate(final = count*survival) %>%
       dplyr::group_by(agePrev) %>%
@@ -87,7 +92,6 @@ prevEst <- function(
       dplyr::arrange()
     
     if(grouped_ages == T){
-      
       prevest<- prevest %>%
         dplyr::mutate(agePrev = as.character(cut(as.numeric(agePrev), c(groups, max(groups)*2), include.lowest = F, right = F, labels = groups))) %>%
         dplyr::group_by(agePrev) %>%
@@ -95,7 +99,10 @@ prevEst <- function(
         dplyr::ungroup()
     }
     
+    prevest <- prevest %>% 
+      dplyr::mutate_all(as.numeric) %>% 
+      dplyr::filter(agePrev >= 0) %>% 
+      dplyr::arrange(agePrev)
     
-  return(prevest %>% dplyr::mutate_all(as.numeric) %>% 
-           dplyr::filter(agePrev >= 0) %>% dplyr::arrange(agePrev))  
+  return(prevest)  
 }
