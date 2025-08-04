@@ -18,6 +18,11 @@ adjust_prevEst <- function( prevEst_ouput=prevest, adjust=F, grouped_ages=T,
                             max.age=85,
                             census.population=census.population,
                             standard.population=US_2000_standard_population ) {
+  
+  prevest <- US_2000_standard_population <- agePrev <- prevalence <- age <- pop <- standard_population <- . <- crude_rate <- weights <- survival  <- NULL
+  
+  `%>%` <- dplyr::`%>%`
+  
   if(is.null(census.population)) {
     stop("Please specify census population for rates")
   }
