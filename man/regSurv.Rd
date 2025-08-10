@@ -7,8 +7,8 @@
 regSurv(
   surv,
   years = NULL,
-  names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", period = "period", observed =
-    "survival"),
+  names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", yrPrev = "yrPrev", period = "period",
+    observed = "survival"),
   life.table
 )
 }

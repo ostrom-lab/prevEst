@@ -3,7 +3,7 @@
 #' @description The function \code{prevEst} is used to estimate complete prevalence using survival and incomplete incidence data
 #'
 #' @param incidence Incomplete incidence dataframe containing age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), and count of new cases (named "count)
-#' @param survival Survival dataframe for each age at prevalence year containing:  age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), observed survival rate (named "survival")
+#' @param survival Survival dataframe for each age at prevalence year containing:  age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), observed survival rate (named "observed")
 #' @param year Numeric. Year for which prevalence is to be estimated
 #' @param years Numeric. Years to use for calculating prevalence. Defaults to all years included in incidence dataframe.
 #' @param grouped_ages Logical. If TRUE, multi-year age groups are used for adjustment.
@@ -80,13 +80,13 @@ prevEst <- function(
       dplyr::distinct(.keep_all=TRUE) %>%
       dplyr::mutate(yrPrev = year,
              agePrev = (year-yrDiag) + ageDiag,
-             survival = ifelse(agePrev >=100, 0, survival)) %>%
+             observed = ifelse(agePrev >=100, 0, observed)) %>%
       dplyr::filter(yrDiag %in% years) %>%
       tidyr::drop_na() 
     
     prevest <- inc %>%
       dplyr::left_join(surv, by = c("ageDiag", "yrDiag", "agePrev","yrPrev")) %>%
-      dplyr::mutate(final = count*survival) %>%
+      dplyr::mutate(final = count*observed) %>%
       dplyr::group_by(agePrev) %>%
       dplyr::summarise(prevalence = round(sum(final, na.rm=TRUE))) %>%
       dplyr::ungroup() %>%

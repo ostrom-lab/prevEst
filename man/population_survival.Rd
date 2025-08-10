@@ -5,11 +5,19 @@
 \title{Apply population survival assumption for years after observation}
 \usage{
 population_survival(
-  life.table = life.table,
   survival.data = survival.data,
   prevYear = NULL,
   years.observed.surv = NULL
 )
+}
+\arguments{
+\item{survival.data}{Survival dataframe}
+
+\item{prevYear}{Year for which prevalence is being estimated}
+
+\item{years.observed.surv}{Years after which to go to population survival}
+
+\item{life.table}{Dataframe of SEER life table}
 }
 \description{
 This function works within a survival formatting function to have survival go to population expected survival after end of observed survival ye

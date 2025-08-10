@@ -16,7 +16,7 @@ prevEst(
 \arguments{
 \item{incidence}{Incomplete incidence dataframe containing age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), and count of new cases (named "count)}
 
-\item{survival}{Survival dataframe for each age at prevalence year containing:  age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), observed survival rate (named "survival")}
+\item{survival}{Survival dataframe for each age at prevalence year containing:  age at diagnosis (named "ageDiag"), year of diagnosis (named "yrDiag"), observed survival rate (named "observed")}
 
 \item{year}{Numeric. Year for which prevalence is to be estimated}
 

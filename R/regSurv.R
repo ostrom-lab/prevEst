@@ -25,6 +25,7 @@ regSurv <- function(
     years=NULL,
     names = c("ageDiag" = "ageDiag", 
               "yrDiag" = "yrDiag",
+              "yrPrev"="yrPrev",
               "period" = "period",
               "observed" = "survival"),
     life.table
@@ -34,14 +35,15 @@ regSurv <- function(
   
   `%>%` <- dplyr::`%>%`
   
-  surv <- 
+  new <- 
     data.frame(ageDiag = surv[[names[["ageDiag"]]]],
                yrDiag = as.numeric(surv[[names[["yrDiag"]]]]),
-               period = as.numeric(surv[[names[["period"]]]]),
+               yrPrev  = as.numeric(surv[[names[["yrPrev"]]]]),
                observed = as.numeric(surv[[names[["observed"]]]])) %>%
-      dplyr::left_join(life.table %>% dplyr::mutate(ageDiag=(agePrev-period)), by = c("ageDiag", "period")) %>%
-      dplyr::group_by(ageDiag) %>%
-      dplyr::arrange(period) %>%
+    dplyr::mutate(period=yrPrev-yrDiag) %>%
+      dplyr::left_join(life.table %>% dplyr::mutate(ageDiag=(agePrev-period)), by = c("ageDiag","yrPrev", "period")) %>%
+      dplyr::group_by(ageDiag,yrDiag) %>%
+      dplyr::arrange(ageDiag,yrDiag,period) %>%
       dplyr::mutate(expected = dplyr::case_when(ageDiag+period >= 100 ~ 0.001,
                                   T ~ cumprod(expected)),
              observed = dplyr::case_when(ageDiag + period >= 100 ~ 0.001,
@@ -65,7 +67,7 @@ regSurv <- function(
                                     observed <= 0 ~ 0.001,
                                     T ~ observed))
       
-      try = try(suppressWarnings(modelr::add_predictions(x, betareg::betareg(surv ~ period + yrDiag, data = x), var = "surv_pred")), silent = T)
+      try = try(suppressWarnings(modelr::add_predictions(x, betareg::betareg(surv ~ as.numeric(period) + jitter(as.numeric(yrDiag)), data = x, dist="xbetax"), var = "surv_pred")), silent = T)
           
           if (inherits(try, "try-error")){ 
             x = x %>% dplyr::mutate(surv_pred = expected) 
@@ -75,7 +77,7 @@ regSurv <- function(
       }
       return(x)
     }
-    regsurv <- surv %>%
+    regsurv <- new %>%
       dplyr::arrange(ageDiag, yrDiag) %>%
       dplyr::group_by(ageDiag) %>%
       tidyr::nest() %>%
@@ -85,7 +87,7 @@ regSurv <- function(
       dplyr::mutate(survival = dplyr::case_when( is.na(observed) ~  surv_pred,
                                           TRUE~ observed) %>% round(., 3)) %>%
       dplyr::ungroup() %>%
-      dplyr::select(ageDiag, yrDiag, survival, period) 
+      dplyr::select(ageDiag, yrDiag, yrPrev, survival, period) 
     
   return(regsurv)
 }

@@ -170,11 +170,11 @@ data(survival_unformatted)
 head(survival_unformatted)
 
 formatted_survival <- format_survival(data=survival_unformatted,
-                                        SurvType = "Observed",
                                         names = c("ageDiag"="ageDiag",
                                                   "yrDiag"="yrDiag",
                                                   "yrPrev"="yrPrev",
-                                                  "Observed"="Observed"))   
+                                                  "Observed"="Observed",
+                                                  "Expected"="Expected"))   
 head(formatted_survival)
 ```
 
@@ -187,13 +187,12 @@ This assumption assumes that, for the years that there is a disparity, there was
 
 ``` {r echo=TRUE}
 
-survival_population <- population_survival(life.table=life.table,
-                                           survival.data=formatted_survival,
-                                           years.observed.surv=20)
+survival_population <- population_survival(survival.data=formatted_survival,
+                                           years.observed.surv=15)
   head(survival_population, 10)
 
 survival_nosurvival <- no_survival(survival.data=formatted_survival,
-                                   years.observed.surv=20)   
+                                   years.observed.surv=15)   
 
 head(survival_nosurvival, 10)
 

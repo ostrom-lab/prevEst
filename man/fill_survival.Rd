@@ -6,6 +6,9 @@
 \usage{
 fill_survival(survival.data = survival.data)
 }
+\arguments{
+\item{survival.data}{Survival dataframe}
+}
 \description{
 This function works within a survival formatting function to make survival stable after end of observation period
 }

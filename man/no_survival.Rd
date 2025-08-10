@@ -10,6 +10,13 @@ no_survival(
   years.observed.surv = NULL
 )
 }
+\arguments{
+\item{survival.data}{Survival dataframe}
+
+\item{prevYear}{Year for which prevalence is being estimated}
+
+\item{years.observed.surv}{Years after which to go to population survival}
+}
 \description{
 This function works within a survival formatting function to apply an assumption of death after observation period
 }

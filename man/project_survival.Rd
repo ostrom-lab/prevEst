@@ -11,8 +11,8 @@ project_survival(
   projection.years = NULL,
   years.observed.surv = NULL,
   prevYear = NULL,
-  assumption = "nosurvival",
-  life.table = NULL
+  method = "linear",
+  assumption = "nosurvival"
 )
 }
 \arguments{
@@ -25,6 +25,8 @@ project_survival(
 \item{projection.years}{Numeric vector of years to predict survival for}
 
 \item{prevYear}{Year for which prevalence is being estimated}
+
+\item{method}{Method used for survival rate prediction, either "linear" (lm) or "betareg"}
 
 \item{assumption}{Named character, either "population" or "nosurvival"}
 
@@ -46,6 +48,7 @@ project_survival(data=raw.survival,
                  projection.years = NULL,
                  prevYear = NULL,
                  assumption = "population",
+                 method="linear",
                  life.table = life.tables,
                  names = c("ageDiag"="Age_recode_with_single_ages_and_85",
                            "yrPrev"="yrPrev",

@@ -6,24 +6,23 @@
 \usage{
 format_survival(
   data,
-  SurvType = "Observed",
   ages = NULL,
   covered_years = NULL,
   prevYear = NULL,
   names = c(ageDiag = "ageDiag", yrDiag = "yrDiag", yrPrev = "yrPrev", period = "period",
-    Observed = "Observed", expected = "Expected")
+    Observed = "Observed", Expected = "Expected")
 )
 }
 \arguments{
 \item{data}{Survival dataframe}
-
-\item{SurvType}{Specify observed or expected survival}
 
 \item{ages}{Numeric vector. If not included, defaults to all ages in data.}
 
 \item{prevYear}{Year of prevalence}
 
 \item{names}{Named vector}
+
+\item{SurvType}{Specify observed or expected survival}
 
 \item{years}{Numeric vector. If not specified, defaults to all years in data.}
 }

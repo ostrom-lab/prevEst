@@ -17,7 +17,6 @@
 
 
 format_survival <- function(data, # Survival data to be formatted
-                            SurvType = "Observed",
                             ages=NULL,                # A vector of ages to be included in the output
                             covered_years=NULL,               # A vector of years to be included in the output
                             prevYear=NULL,
@@ -26,13 +25,12 @@ format_survival <- function(data, # Survival data to be formatted
                                     "yrPrev"="yrPrev",
                                     "period"="period",
                                     "Observed"="Observed",
-                                    "expected" ="Expected")
+                                    "Expected" ="Expected")
 ) {
   `%>%` <- dplyr::`%>%`
   
   . <- yrDiag <- ageDiag <- yrPrev <- NULL
   
-
   if( !("yrPrev" %in% names (names))) {
     data$yrPrev <- data$yrDiag + data$period
     names <- c(names,"yrPrev"="yrPrev")
@@ -41,12 +39,24 @@ format_survival <- function(data, # Survival data to be formatted
   new <- data %>%
     dplyr::rename( c("ageDiag"=names[["ageDiag"]],
                      "yrDiag"=names[["yrDiag"]], 
-                               "yrPrev" =names[["yrPrev"]],
-                               "survival"=names[[SurvType]])) %>%
-    dplyr::select(ageDiag,yrDiag,yrPrev,survival) %>%
-    dplyr::mutate_all(as.numeric) %>%
-                     dplyr::mutate(survival = dplyr::case_when(max(survival, na.rm=TRUE) >1 ~ survival/100,
-                                                               TRUE ~ survival))  %>%
+                     "yrPrev" =names[["yrPrev"]],
+                     "observed"=names[["Observed"]],
+                     "expected"=names[["Expected"]])) %>%
+    dplyr::select(ageDiag,yrDiag,yrPrev,observed,expected) 
+  
+  
+  if( max(new$observed, na.rm=TRUE)>1 ) {
+    new <- new %>%
+      dplyr::mutate_at(.vars=vars(observed,expected),~as.numeric(.)/100)
+  } else {
+    new <- new %>%
+      dplyr::mutate_at(.vars=vars(observed,expected),as.numeric)
+  }
+  
+  new <- new %>%
+    dplyr::mutate(observed = dplyr::case_when(yrDiag==yrPrev ~ 1,
+                                              max(.$observed, na.rm=TRUE) >1 ~ observed/100,
+                                              TRUE ~ observed))  %>%
     dplyr::distinct(.keep_all=TRUE)  
   
   if (is.null(ages)) {
@@ -59,13 +69,6 @@ format_survival <- function(data, # Survival data to be formatted
   if(is.null(prevYear)) {
     prevYear = covered_years
   } 
-  
-  new <- new %>%
-    dplyr::filter(yrDiag %in% covered_years) %>%
-    dplyr::filter(ageDiag %in% ages) %>%
-    dplyr::filter(yrPrev %in% prevYear)  %>%
-    dplyr::arrange(yrDiag, ageDiag)
-  
   
   skeleton <- tidyr::expand_grid(ageDiag = ages,
                                  yrDiag =  as.numeric(covered_years)) %>%
@@ -126,8 +129,8 @@ format_lifetable <- function(data, # A dataframe of counts for each unique combi
     dplyr::mutate( yrPrev=year+period,
                    agePrev=age+period,
                    expected=dplyr::case_when(any(expected>1)~ as.numeric(expected)/100,
-                                     agePrev >=100~0,
-                                     TRUE~as.numeric(expected))) %>%
+                                             agePrev >=100~0,
+                                             TRUE~as.numeric(expected))) %>%
     dplyr::select(agePrev,yrPrev,period,expected)
   
   return(as.data.frame(life.table))
